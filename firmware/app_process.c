@@ -904,6 +904,47 @@ static void start_frame_timer(void)
                     (sl_rail_timer_callback_t)frame_timer_cb);
 }
 
+// ------------------------------------------------- a radio on J3 RX at power-up --
+// A board stored as a receiver (or set by jumpers, with no RANGE jumper) does not listen for serial frames. Put
+// into a radio bay it must still become the transmitter module, so at power-up it first looks at J3 RX (PA06):
+//   floating (nothing there: a receiver in a model) -> no delay, the board starts as set up;
+//   driven (a radio, an encoder or the controller box on it) -> up to BAY_PROBE_MS for MULTI frames, either
+//   polarity. Good frames -> transmitter under serial control for this power-up; nothing is stored, so the board
+//   is a receiver again when it goes back into a model.
+#define BAY_PROBE_MS  2000u
+static bool j3_rx_driven(sl_rail_handle_t rh)
+{
+  sl_gpio_t rx = { .port = SL_GPIO_PORT_A, .pin = 6 };
+  bool up, down;
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 1);
+  uint32_t t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 300u) { }
+  up = !pin_low(&rx);
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 0);
+  t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 300u) { }
+  down = !pin_low(&rx);
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 1);
+  return up == down;                                 // the pulls cannot move it: something drives the line
+}
+
+static bool bay_probe(sl_rail_handle_t rh)
+{
+  bay_init(rh, bay_on_frame);
+  uint32_t t0 = (uint32_t)sl_rail_get_time(rh), tpol = t0;
+  int32_t good0 = bay_diag[BAY_GOOD];
+  for (;;) {
+    uint32_t now = (uint32_t)sl_rail_get_time(rh);
+    if (bay_diag[BAY_OK] >= 3) return true;                       // EUSART1 stays on: bay_detect carries on
+    if ((uint32_t)(now - t0) >= BAY_PROBE_MS * 1000u) break;
+    if (bay_diag[BAY_GOOD] != good0) { good0 = bay_diag[BAY_GOOD]; tpol = now; }
+    else if ((uint32_t)(now - tpol) >= BAY_POL_TRY_MS * 1000u) { tpol = now; bay_set_inverted(!bay_inverted()); }
+  }
+  NVIC_DisableIRQ(EUSART1_RX_IRQn);
+  NVIC_DisableIRQ(EUSART1_TX_IRQn);
+  EUSART_IntDisable(EUSART1, EUSART_IEN_RXFL);
+  EUSART_Enable(EUSART1, eusartDisable);           // PA06 back to the log UART alone
+  return false;
+}
+
 // ----------------------------------------------------------------- startup --
 static void proto_start(void)
 {
@@ -943,6 +984,27 @@ static void proto_start(void)
     is_rx = true;
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log("SETUP bind plug on servo connector 8: RLINK receiver for this power-up, waiting for setup packets (RxSetup)\r\n");
+#endif
+  }
+  bool force_serial = false;                        // a radio on J3 RX: transmitter under serial control, this power-up
+  bool would_listen = cfg_used ? !is_rx : (!fs && pin_low(&range_pin));
+  if (!plug && !would_listen && j3_rx_driven(rh)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log("SETUP J3 RX is driven: looking %u ms for MULTI frames before starting as %s\r\n", (unsigned)BAY_PROBE_MS, is_rx ? "a receiver" : "PPM transmitter");
+#endif
+    if (bay_probe(rh)) {
+      force_serial = true;
+      cfg_used = true;                              // for this power-up only (nothing is stored): a transmitter whose
+      memset(&cfg_boot, 0, sizeof cfg_boot);        // protocol comes from the frames, as a stored TX with F/S low
+      cfg_boot.role = CFG_ROLE_TX;
+      is_rx = false; fs = true;
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+      app_log("SETUP MULTI frames on J3 RX (%s): transmitter module for this power-up, the stored setup is kept\r\n",
+              bay_inverted() ? "inverted, an EdgeTX radio" : "normal polarity");
+#endif
+    }
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    else app_log("SETUP no MULTI frames on J3 RX: starting as set up\r\n");
 #endif
   }
   if (is_rx) rx_outputs_boot(rh, cfg_used ? cfg_boot.outputs : 0u, plug);   // output layout, bind plug on servo connector 8
@@ -988,9 +1050,9 @@ static void proto_start(void)
   // with F/S low. It overrides every other jumper. A stored TX setup with F/S open (no jumpers) listens for both:
   // MULTI frames -> encoder control, PPM -> the stored protocol. Any other setting: exactly as before, no serial.
   bool bay_auto = cfg_used && !is_rx && !fs;
-  bay_listen = cfg_used ? (!is_rx) : (!fs && pin_low(&range_pin));
+  bay_listen = force_serial || (cfg_used ? (!is_rx) : (!fs && pin_low(&range_pin)));
   if (bay_listen) {
-    bay_init(rh, bay_on_frame);
+    if (!force_serial) bay_init(rh, bay_on_frame);   // after the probe it is running already
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log(bay_auto ? "BAY v1.4 stored TX setup, no F/S: MULTI frames on PA06 = encoder control, PPM on PB01 = the stored protocol; waiting for either\r\n"
           : cfg_used ? "BAY v1.1 stored TX setup, F/S low: encoder control; waiting for MULTI frames on PA06\r\n"
