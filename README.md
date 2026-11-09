@@ -28,13 +28,14 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 | `controller/` | the RF Module Controller: an STM32F103C8 box with a 128×64 display that sets the module up over its serial pins — STM32CubeIDE project, manual |
 | `hardware/rf_module/` | the module carrier board: KiCad project, Gerbers, BOM and placement files |
 | `hardware/controller/` | the controller board: KiCad project, Gerbers, BOM and placement files |
-| `docs/` | operating quick sheet, the serial input and setup command reference, the RLINK description |
+| `docs/` | operating quick sheet, flashing with an ST-Link, the serial input and setup command reference, the RLINK description |
 | `CREDITS.md` | people, projects and components this builds on, with their licences |
 
 ## Start here
 
 1. **Build a board** — `hardware/rf_module/README.md` (what to order, what to leave off for the 2.4 GHz-only variant).
-2. **Flash it** — `firmware/README.md` (toolchain, `build.ps1`, flashing over SWD with pyOCD, or the prebuilt hex).
+2. **Flash it** — with only an ST-Link: `docs/FLASHING_STLINK.md` (the prebuilt firmware and a setup file for each
+   role, no USB-serial adapter needed); to build it yourself: `firmware/README.md`.
 3. **Use it** — `docs/QUICK_SHEET_EFR32_Module.md`: connections, roles, modes, bind, failsafe, LEDs.
 4. **Feed it** — `docs/SERIAL_INPUT.md`: what a transmitter has to send (PPM or the Multiprotocol serial frame),
    and the text commands any programmer can use to set the module up.

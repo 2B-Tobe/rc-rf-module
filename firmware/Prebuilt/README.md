@@ -39,13 +39,8 @@ To refresh it after a build and a bench test:
 Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.4.hex
 ```
 
-## Setting a board as transmitter with only an SWD programmer
+## Setting a board up with only an SWD programmer
 
-`cfg_tx_rlink.hex` (single band) and `cfg_tx_rlink_dual.hex` (with the 459 MHz link) write only the setup page
-(0x08042000), as `cfg tx rlink` / `cfg tx rlink dual` would. The firmware is not touched. In an EdgeTX radio or
-with a serial encoder the frames choose the protocol anyway; the stored protocol is used with PPM input.
-
-```
-python -m pyocd flash -t efr32mg24a420f1536im48 cfg_tx_rlink.hex
-```
-
+The files in `setup/` write only the setup page (0x08042000), as the `cfg` commands would: `setup_tx.hex`,
+`setup_tx_dual.hex`, receivers for RLINK, DSMX, D8, D16 and nRF24 with their output layouts, and `setup_clear.hex`.
+The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
