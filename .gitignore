@@ -1,0 +1,23 @@
+# firmware (CMake build output)
+firmware/cmake_gcc/build/
+
+# controller (STM32CubeIDE build output)
+controller/Debug/
+controller/Release/
+controller/build/
+
+# KiCad working files
+hardware/**/*-backups/
+hardware/**/*.kicad_prl
+hardware/**/fp-info-cache
+hardware/**/*.bak
+hardware/**/*-bak
+hardware/**/_autosave-*
+hardware/**/*.lck
+
+# editors
+.vscode/
+.codex/
+*.swp
+Thumbs.db
+.DS_Store

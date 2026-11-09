@@ -1,0 +1,603 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: rc_module_trx
+label: rc_module_trx
+description: |
+  The Silicon Labs RAIL - SoC Simple TRX sample application demonstrates the most basic exchange of transmit and receive operations between two nodes implemented in RAIL. It serves as a straightforward link test setup, where the nodes primarily listen, except for short periods when packet transmission occurs. This example is ideal for evaluating radio performance, testing connectivity, or verifying signal integrity. The Simple TRX application initializes RAIL to support a single PHY radio configuration and defines an empty radio event handler, making it a recommended starting point for RAIL-based projects. Whether assessing energy consumption, optimizing radio configuration, or simply testing communication, the Simple TRX provides a solid foundation1.
+category: RAIL Examples
+filter:
+- name: Device Type
+  value:
+  - SoC
+- name: Project Difficulty
+  value:
+  - Beginner
+- name: Wireless Technology
+  value:
+  - RAIL
+package: rail_sdk_sample_app
+quality: production
+readme:
+- path: readme.md
+source:
+- path: app_init.c
+- path: app_process.c
+- path: app_cli.c
+tag:
+- hwfilter:board:simple_button:btn0
+- hwfilter:board:simple_led:led0
+- hwfilter:!board:hardware:shares:button:led
+- hwfilter:ram:9k
+- hwfilter:board:hardware:has:pti
+- hwfilter:!device:device_no_rail_api
+- hwfilter:board:hardware:has:vcom
+- hwfilter:!device:device_family_mgm27
+- hwfilter:!device:device_family_mgm24
+- hwfilter:!device:device_family_mgm26
+- hwfilter:!device:device_generic_family_efr32xg21
+- hwfilter:flash:100k
+include:
+- path: .
+  file_list:
+  - path: app_init.h
+  - path: app_process.h
+sdk:
+  vendor: silabs
+  id: simplicity_sdk
+  version: 2026.6.1
+toolchain_settings:
+- value: debug
+  option: optimize
+component:
+- package: simplicity_sdk
+  vendor: silabs
+  id: EFR32MG24A420F1536IM48
+- package: simplicity_sdk
+  vendor: silabs
+  id: app_assert
+- package: simplicity_sdk
+  vendor: silabs
+  id: app_log
+- package: simplicity_sdk
+  instance:
+  - example
+  vendor: silabs
+  id: cli
+- package: simplicity_sdk
+  vendor: silabs
+  id: clock_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: code_classification
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_init
+- package: simplicity_sdk
+  instance:
+  - inst
+  vendor: silabs
+  id: iostream_eusart
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_recommended_stream
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_retarget_stdio
+- package: simplicity_sdk
+  vendor: silabs
+  id: mpu
+- package: simplicity_sdk
+  vendor: silabs
+  id: printf
+- package: simplicity_sdk
+  vendor: silabs
+  id: radio_config_simple_rail_singlephy
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_base
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_connect
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_connect_ofdm
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_ieee802154_bpsk
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_long_range
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_sidewalk
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_sun
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_wisun_fan_1_0
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_wisun_fan_1_1
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_wisun_han
+- package: simplicity_sdk
+  vendor: silabs
+  id: restrictions_profile_wisun_ofdm
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_sdk_packet_asm
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_sdk_packet_assistant
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_sdk_simple_assistance
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_compatible_pa
+- package: simplicity_sdk
+  instance:
+  - inst0
+  vendor: silabs
+  id: sl_rail_util_init
+autoselected_components:
+- package: simplicity_sdk
+  vendor: silabs
+  id: agents_md
+- package: simplicity_sdk
+  vendor: silabs
+  id: atomic
+- package: simplicity_sdk
+  vendor: silabs
+  id: bit
+- package: simplicity_sdk
+  vendor: silabs
+  id: button
+- package: simplicity_sdk
+  vendor: silabs
+  id: cli_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: clock_manager_init_hal_s2
+- package: simplicity_sdk
+  vendor: silabs
+  id: clock_manager_runtime
+- package: simplicity_sdk
+  vendor: silabs
+  id: clock_manager_runtime_hal_s2
+- package: simplicity_sdk
+  vendor: silabs
+  id: cmsis_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: component_catalog
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_clock
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_clock_hal
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_dma
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_dma_hal
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_gpio
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_i2c
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_init_dcdc
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_init_dcdc_s2
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_init_emu
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_peripheral
+- package: simplicity_sdk
+  vendor: silabs
+  id: device_peripheral_hal
+- package: simplicity_sdk
+  vendor: silabs
+  id: dma_channel
+- package: simplicity_sdk
+  vendor: silabs
+  id: dma_descriptor_allocator
+- package: simplicity_sdk
+  vendor: silabs
+  id: dma_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: dma_manager_hal_ldma
+- package: simplicity_sdk
+  vendor: silabs
+  id: dma_manager_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_cmu
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_cmu_impl
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_emu
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_eusart
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_gpio
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_msc
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_prs
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_syscfg
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_system
+- package: simplicity_sdk
+  vendor: silabs
+  id: emlib_timer
+- package: simplicity_sdk
+  vendor: silabs
+  id: enum
+- package: simplicity_sdk
+  vendor: silabs
+  id: errno_error_codes
+- package: simplicity_sdk
+  vendor: silabs
+  id: event_handler
+- package: simplicity_sdk
+  vendor: silabs
+  id: gpio
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_eusart
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_gpio
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_ldma
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_prs
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_prs_impl
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_syscfg
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_syscfg_impl
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_system
+- package: simplicity_sdk
+  vendor: silabs
+  id: hal_system_impl
+- package: simplicity_sdk
+  vendor: silabs
+  id: interrupt_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: interrupt_manager_cortexm
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_eusart_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_stdlib_config
+- package: simplicity_sdk
+  vendor: silabs
+  id: iostream_uart_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: led
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager_pool
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager_pool_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager_region
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager_retention_control
+- package: simplicity_sdk
+  vendor: silabs
+  id: memory_manager_retention_control_hal
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_lib
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_lib_singleprotocol
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_lib_singleprotocol_alpha_chips
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_lib_singleprotocol_internal_chips_dummy
+- package: simplicity_sdk
+  vendor: silabs
+  id: rail_util_features
+- package: simplicity_sdk
+  instance:
+  - instance0
+  vendor: silabs
+  id: simple_button
+- package: simplicity_sdk
+  vendor: silabs
+  id: simple_button_core
+- package: simplicity_sdk
+  instance:
+  - inst0
+  vendor: silabs
+  id: simple_led
+- package: simplicity_sdk
+  vendor: silabs
+  id: simple_led_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_assert
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_common
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_memory_init
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_main_process_action
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_sdk_channel_selector
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_sdk_fifo_size
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_built_in_phys
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_callbacks
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_init_core
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_pa
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_pa_tables
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_protocol
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_rail_util_sequencer
+- package: simplicity_sdk
+  vendor: silabs
+  id: sl_string
+- package: simplicity_sdk
+  vendor: silabs
+  id: slist
+- package: simplicity_sdk
+  vendor: silabs
+  id: status
+template_contribution:
+- name: cli_command
+  priority: 0
+  value:
+    name: info
+    handler: cli_info
+    help: Unique ID of the MCU
+- name: cli_command
+  priority: 0
+  value:
+    name: send
+    handler: cli_send_packet
+    help: Send a packet
+- name: cli_command
+  priority: 0
+  value:
+    name: receive
+    handler: cli_receive_packet
+    help: Turn ON/OFF received message forwarding on CLI
+    argument:
+    - type: uint8
+      help: ON/OFF
+requires:
+- name: a_radio_config
+- name: sl_rail_sdk_fifo_size
+- name: sl_rail_sdk_channel_selector
+- name: simple_button
+- name: simple_led
+configuration:
+- name: SL_STACK_SIZE
+  value: '2048'
+- name: configMINIMAL_STACK_SIZE
+  value: '1024'
+- name: CPU_CFG_TS_32_EN
+  value: '1'
+- name: OS_CFG_DBG_EN
+  value: '1'
+- name: OS_CFG_TS_EN
+  value: '1'
+- name: OS_CFG_SCHED_ROUND_ROBIN_EN
+  value: '1'
+- name: OS_CFG_STAT_TASK_EN
+  value: '1'
+- name: OS_CFG_TASK_PROFILE_EN
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT
+  value: SL_RAIL_UTIL_PROTOCOL_PROPRIETARY
+- name: SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_PROTOCOL_IEEE802154_2P4GHZ_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_PROTOCOL_IEEE802154_GB868_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_PROTOCOL_ZWAVE_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_INIT_CALIBRATIONS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_CALIBRATION_TEMPERATURE_NOTIFY_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_TRANSITION_INST0_TX_SUCCESS
+  value: RAIL_RF_STATE_RX
+- name: SL_RAIL_UTIL_INIT_TRANSITION_INST0_TX_ERROR
+  value: RAIL_RF_STATE_RX
+- name: SL_RAIL_UTIL_INIT_TRANSITION_INST0_RX_SUCCESS
+  value: RAIL_RF_STATE_RX
+- name: SL_RAIL_UTIL_INIT_TRANSITION_INST0_RX_ERROR
+  value: RAIL_RF_STATE_RX
+- name: SL_RAIL_UTIL_INIT_DATA_FORMATS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_RX_FIFO_INST0_BYTES
+  value: '256'
+- name: SL_RAIL_UTIL_INIT_TX_FIFO_INST0_BYTES
+  value: '256'
+- name: SL_RAIL_UTIL_INIT_EVENTS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_PREAMBLE_LOST_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_PACKET_RECEIVED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_ADDRESS_FILTERED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_FRAME_ERROR_INST0_ENABLE
+  value: '0'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_PACKET_ABORTED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_PACKET_SENT_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_ABORTED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_BLOCKED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_FIFO_OVERFLOW_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_UNDERFLOW_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_CHANNEL_BUSY_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_TX_SCHEDULED_RX_TX_STARTED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_RX_SCHEDULED_RX_MISSED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_TX_SCHEDULED_TX_MISSED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_CONFIG_UNSCHEDULED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_CONFIG_SCHEDULED_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_SCHEDULER_STATUS_INST0_ENABLE
+  value: '1'
+- name: SL_RAIL_UTIL_INIT_EVENT_CAL_NEEDED_INST0_ENABLE
+  value: '1'
+- condition:
+  - device_generic_family_efr32xg25
+  name: SL_RAIL_UTIL_PA_SELECTION_SUBGHZ
+  value: RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE
+- condition:
+  - device_generic_family_efr32xg25
+  name: SL_RAIL_UTIL_PA_SELECTION_OFDM
+  value: RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE
+- condition:
+  - device_generic_family_efr32xg25
+  - hardware_board_default_rf_band_470
+  name: SL_CLOCK_MANAGER_RFFPLL_BAND
+  value: '1'
+- condition:
+  - device_generic_family_efr32xg25
+  - hardware_board_default_rf_band_450
+  name: SL_CLOCK_MANAGER_RFFPLL_BAND
+  value: '0'
+- name: SL_BOARD_ENABLE_VCOM
+  value: '1'
+- name: SL_CLI_LOCAL_ECHO
+  value: '1'
+- name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+  value: '1'
+- unless:
+  - hardware_board_stk
+  name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
+  value: usartHwFlowControlCtsAndRts
+- condition:
+  - hardware_board_stk
+  name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
+  value: usartHwFlowControlNone
+- name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+  value: '1'
+- unless:
+  - hardware_board_stk
+  name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+  value: SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS
+- condition:
+  - hardware_board_stk
+  name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
+  value: SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE
+- name: APP_LOG_PREFIX_ENABLE
+  value: '0'
+ui_hints:
+  highlight:
+  - path: config/rail/radio_settings.radioconf
+  - path: readme.md
+    focus: true
+

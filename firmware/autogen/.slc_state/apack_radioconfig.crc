@@ -1,0 +1,40 @@
+{
+  "generatedFiles" : [ "rail_config.c", "rail_config.h", "radioconf_generation_log.json" ],
+  "apackName" : "apack_radioConfig",
+  "equality" : {
+    "sdkId" : "com.silabs.sdk.stack.simplicity_sdk:2026.6.1",
+    "generatorIds" : [ "visual-studio-code" ],
+    "fileStates" : {
+      "config\\rail\\profile_base.restriction" : {
+        "hash" : 809723180,
+        "exists" : true
+      },
+      "config\\rail\\radio_settings.radioconf" : {
+        "hash" : -2015957915,
+        "exists" : true
+      },
+      "config\\rail\\profile_connect.restriction" : {
+        "hash" : 493020707,
+        "exists" : true
+      },
+      "config\\rail\\radio_settings.radioconf.bak" : {
+        "hash" : 501156116,
+        "exists" : true
+      },
+      "config\\rail\\profile_long_range.restriction" : {
+        "hash" : 342997300,
+        "exists" : true
+      }
+    },
+    "acTrackedFile" : {
+      "apack.info" : {
+        "hash" : -1281438438,
+        "exists" : true
+      }
+    },
+    "generateArgs" : {
+      "partOpn" : "efr32mg24a420f1536im48",
+      "boards" : "none"
+    }
+  }
+}

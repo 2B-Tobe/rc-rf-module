@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP RF-BM-MG24B2I
+D RF-star EFR32MG24 2.4GHz multiprotocol module, +19.5dBm, IPEX, 30 GPIO. HFXO CTUNE=70
+K EFR32MG24 RF module 2.4GHz
+F https://www.rfstariot.com/uploadfile/downloads/RF-BM-MG24B1_MG24B2_MG24B2I%20Hardware%20Datasheet%20V1.0_20250403.pdf
+$ENDCMP
+#
+#End Doc Library
