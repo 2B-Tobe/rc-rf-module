@@ -44,3 +44,11 @@ Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:
 The files in `setup/` write only the setup page (0x08042000), as the `cfg` commands would: `setup_tx.hex`,
 `setup_tx_dual.hex`, receivers for RLINK, DSMX, D8, D16 and nRF24 with their output layouts, and `setup_clear.hex`.
 The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
+
+## Licence of the hex files
+
+The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.4.hex` also contains Silicon Labs software:
+the RAIL radio library (Zlib) and parts used under the Silicon Labs Master Software License Agreement
+(https://www.silabs.com/about-us/legal/master-software-license-agreement). Those Silicon Labs parts may be used
+only as part of this firmware on Silicon Labs devices; they may not be extracted, redistributed on their own or
+reverse-engineered. The `setup/` files hold settings only, no Silicon Labs code.
