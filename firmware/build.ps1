@@ -12,8 +12,8 @@
 #      otherwise a CMake on PATH (3.25 or newer). Nothing is tied to one PC or
 #      one user name.
 #   3. Copies the RAIL radio library and the iostream printf files in from the
-#      installed Simplicity SDK if they are missing (they are under the Silicon
-#      Labs MSLA and not in the repository, see CREDITS.md).
+#      installed Simplicity SDK if they are missing (they are not in the
+#      repository, see CREDITS.md).
 #   4. Configures and builds cmake_gcc\. The compiler and Ninja are located by
 #      cmake_gcc\toolchain.cmake, which the IDE generates when the project is
 #      imported.
@@ -55,8 +55,8 @@ if (Test-Path $conan) {
 $env:Path = (($dirs | Select-Object -Unique) -join ';') + ';' + $env:Path
 Write-Host "CMake: $cmake"
 
-# 3. the Silicon Labs files under their own licence (MSLA): the RAIL radio library and the iostream printf
-# glue. They may not be shared on their own, so they are not in this repository. Importing the project
+# 3. Silicon Labs files not in this repository: the RAIL radio library (a binary, Zlib) and the iostream
+# printf glue (MSLA source, which may not be shared). Importing the project
 # normally copies them in; any that are missing are taken from the installed SDK (only the 2026.6.1 copy,
 # checked by its SHA-256; text files are compared with Windows line ends removed).
 $sdkfiles = @(

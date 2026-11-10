@@ -9,7 +9,8 @@
 | Component | Where | Licence | Note |
 |---|---|---|---|
 | Silicon Labs Simplicity SDK 2026.6.1, Zlib parts (platform, emlib, peripherals, CLI, iostream, app_log, device init, DMA manager, CMSIS-Core port) | `firmware/simplicity_sdk_2026.6.1/` | Zlib | the subset the project uses, copied in by the Simplicity Studio project generator; `firmware/autogen/sbom/` holds Silicon Labs' bill of materials with the licence of every component |
-| Silicon Labs RAIL library (`librail_efr32xg24_gcc_release.a`) and the iostream printf glue (`iostream_printf.c/.h`) | **not in this repository** | Silicon Labs MSLA | the MSLA does not allow these to be shared on their own. They come with the Simplicity SDK 2026.6.1: importing `rc_module_trx.slcp` copies them in, and `build.ps1` copies any that are missing from the installed SDK. The prebuilt hex files contain the library built into the firmware, which the MSLA allows |
+| Silicon Labs RAIL library (`librail_efr32xg24_gcc_release.a`) | **not in this repository** | Zlib (binary only) | the SDK's `License.txt` puts the files in `platform/radio/rail_lib/autogen/librail_release` under Zlib. Kept out of the repository all the same: it comes with the Simplicity SDK 2026.6.1, importing `rc_module_trx.slcp` copies it in, and `build.ps1` copies it from the installed SDK if it is missing. The prebuilt hex files contain it built into the firmware |
+| Silicon Labs iostream printf glue (`iostream_printf.c/.h`) | **not in this repository** | Silicon Labs MSLA | the MSLA does not allow its source code to be shared; it comes with the SDK in the same way as the RAIL library |
 | Silicon Labs RAIL headers and RAIL utility plugins | `firmware/simplicity_sdk_2026.6.1/rail_library/`, `rail_sdk/` | Zlib | |
 | Arm CMSIS-Core | `firmware/simplicity_sdk_2026.6.1/cmsis/` | Apache-2.0 | |
 | Tiny printf by Marco Paland | `firmware/simplicity_sdk_2026.6.1/printf/` | MIT | |

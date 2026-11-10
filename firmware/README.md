@@ -24,7 +24,7 @@ Studio project is `rc_module_trx.slcp` (the project keeps its development name; 
 | `rx_store.c/.h` | binds and failsafe presets in flash page 0x08040000 (8 slots); the setup is in page 0x08042000. Both survive a firmware update |
 | `config/`, `autogen/` | SDK configuration and generated files (radio configuration in `config/rail/`) |
 | `cmake_gcc/` | the CMake build (`build/` is generated and not committed) |
-| `simplicity_sdk_2026.6.1/` | the SDK subset the project uses, without the RAIL library and the iostream printf files (Silicon Labs MSLA, not shared here; see below) |
+| `simplicity_sdk_2026.6.1/` | the SDK subset the project uses, without the RAIL library and the iostream printf files (they come with the SDK; see below) |
 | `Prebuilt/` | ready-to-flash hex files |
 
 ## Toolchain
@@ -42,10 +42,10 @@ cd C:\dev\rc-rf-module\firmware
 .\build.ps1
 ```
 
-The RAIL radio library (`librail_efr32xg24_gcc_release.a`) and `iostream_printf.c/.h` are Silicon Labs files under
-their MSLA licence, which does not allow them to be shared on their own, so they are not in the repository. Importing
-the project normally copies them in from your SDK; if not, `build.ps1` finds them in the installed Simplicity SDK
-2026.6.1 (checked by SHA-256) and copies them in. If it cannot find them it stops and says so: install the SDK
+The RAIL radio library (`librail_efr32xg24_gcc_release.a`) and `iostream_printf.c/.h` are Silicon Labs files that are
+not in the repository: the library is a binary (Zlib), and the printf files are under the MSLA, which does not allow
+sharing their source. Importing the
+project normally copies them in from your SDK; if not, `build.ps1` finds them in the installed Simplicity SDK 2026.6.1 (checked by SHA-256) and copies them in. If it cannot find them it stops and says so: install the SDK
 2026.6.1 and import the project.
 
 Result: `cmake_gcc\build\base\rc_module_trx.hex`. `build.ps1` touches `app_process.c` first so that every
