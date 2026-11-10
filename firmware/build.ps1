@@ -11,7 +11,10 @@
 #      Labs VS Code extension (%USERPROFILE%\.silabs\slt\installs\conan\p\...),
 #      otherwise a CMake on PATH (3.25 or newer). Nothing is tied to one PC or
 #      one user name.
-#   3. Configures and builds cmake_gcc\. The compiler and Ninja are located by
+#   3. Copies the RAIL radio library and the iostream printf files in from the
+#      installed Simplicity SDK if they are missing (they are under the Silicon
+#      Labs MSLA and not in the repository, see CREDITS.md).
+#   4. Configures and builds cmake_gcc\. The compiler and Ninja are located by
 #      cmake_gcc\toolchain.cmake, which the IDE generates when the project is
 #      imported.
 #
@@ -52,7 +55,40 @@ if (Test-Path $conan) {
 $env:Path = (($dirs | Select-Object -Unique) -join ';') + ';' + $env:Path
 Write-Host "CMake: $cmake"
 
-# 3. configure and build
+# 3. the Silicon Labs files under their own licence (MSLA): the RAIL radio library and the iostream printf
+# glue. They may not be shared on their own, so they are not in this repository. Importing the project
+# normally copies them in; any that are missing are taken from the installed SDK (only the 2026.6.1 copy,
+# checked by its SHA-256; text files are compared with Windows line ends removed).
+$sdkfiles = @(
+  @{ Path = 'rail_library\autogen\librail_release\librail_efr32xg24_gcc_release.a'; Text = $false;
+     Hash = 'DA19EB0EE0E947C7301EA08A697065ABC84CB6E663B8CC6852ED03934CF801B6' },
+  @{ Path = 'printf\src\iostream_printf.c'; Text = $true;
+     Hash = '73108C38FE53DB4FB4B04DAD8CF6C9E57245B2B41BAACD1962FFC44FE1B84826' },
+  @{ Path = 'printf\inc\iostream_printf.h'; Text = $true;
+     Hash = '0CB93C73894DEF2E40FD48F2D19499559B86A6D88C94535D1457FFB844A9B8E8' }
+)
+function Get-SdkHash($file, $text) {
+  $bytes = [System.IO.File]::ReadAllBytes($file)
+  if ($text) { $bytes = [byte[]]($bytes | Where-Object { $_ -ne 13 }) }
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  return ([System.BitConverter]::ToString($sha.ComputeHash($bytes)) -replace '-', '')
+}
+$roots = @($conan, (Join-Path $env:USERPROFILE 'SimplicityStudio'), 'C:\SiliconLabs') | Where-Object { Test-Path $_ }
+foreach ($f in $sdkfiles) {
+  $dest = Join-Path $proj (Join-Path 'simplicity_sdk_2026.6.1' $f.Path)
+  if (Test-Path $dest) { continue }
+  $name  = Split-Path $f.Path -Leaf
+  $found = $roots | ForEach-Object { Get-ChildItem -Path $_ -Recurse -Filter $name -ErrorAction SilentlyContinue } |
+           Where-Object { (Get-SdkHash $_.FullName $f.Text) -eq $f.Hash } | Select-Object -First 1
+  if (-not $found) {
+    throw "$name not found. Install the Simplicity SDK 2026.6.1 (Simplicity Studio 6 or the Silicon Labs VS Code extension) and import rc_module_trx.slcp, then run build.ps1 again."
+  }
+  New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+  Copy-Item $found.FullName $dest
+  Write-Host "Copied from the installed SDK: $($found.FullName)"
+}
+
+# 4. configure and build
 Push-Location (Join-Path $proj 'cmake_gcc')
 try {
   & $cmake --preset project

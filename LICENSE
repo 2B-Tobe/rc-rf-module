@@ -1,3 +1,24 @@
+RC RF Module - firmware, documentation and hardware design files
+Copyright (C) 2026 Tobe (2B-Tobe)
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation, version 3 of the License, or (at your option)
+any later version. The full text of the licence follows below.
+
+Additional permission under GNU GPL version 3 section 7
+
+If you modify this Program, or any covered work, by linking or combining it with the Silicon Labs RAIL
+library (for example librail_efr32xg24_gcc_release.a) and the other Silicon Labs components distributed
+with the Simplicity SDK under the Silicon Labs Master Software License Agreement, containing parts covered
+by the terms of that agreement, the licensor of this Program grants you additional permission to convey the resulting work. Corresponding Source for a non-source form
+of such a combination shall not include the source code for the parts of those Silicon Labs components
+that are not available in source form under that agreement, and those components are not covered by this
+License.
+
+The Controller (controller/) is under the MIT licence, see controller/LICENSE.
+
+------------------------------------------------------------------------------------------------------------
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 

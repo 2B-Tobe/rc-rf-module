@@ -51,5 +51,6 @@ band at 100 mW; check what your country allows before fitting the RA-01.
 
 The firmware, the documentation and the hardware design files are released under the **GNU GPL v3** (see
 `LICENSE`). The Controller (`controller/`) is under the **MIT licence** (`controller/LICENSE`). Third-party
-components keep their own licences — listed in `CREDITS.md`, with the Silicon Labs RAIL library (a binary
-under the Silicon Labs MSLA) among them.
+components keep their own licences, listed in `CREDITS.md`. The Silicon Labs RAIL radio library is a binary under
+the Silicon Labs MSLA and is **not** in this repository: it comes with the Simplicity SDK, and `build.ps1` copies
+it in. The firmware licence includes an additional permission to build it with that library (top of `LICENSE`).

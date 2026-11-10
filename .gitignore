@@ -1,6 +1,11 @@
 # firmware (CMake build output)
 firmware/cmake_gcc/build/
 
+# Silicon Labs files under the MSLA: not shared here, copied in from the installed SDK (see CREDITS.md)
+firmware/simplicity_sdk_2026.6.1/rail_library/autogen/librail_release/*.a
+firmware/simplicity_sdk_2026.6.1/printf/src/iostream_printf.c
+firmware/simplicity_sdk_2026.6.1/printf/inc/iostream_printf.h
+
 # controller (STM32CubeIDE build output)
 controller/Debug/
 controller/Release/

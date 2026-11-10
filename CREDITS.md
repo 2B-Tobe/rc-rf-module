@@ -8,8 +8,9 @@
 
 | Component | Where | Licence | Note |
 |---|---|---|---|
-| Silicon Labs Simplicity SDK 2026.6.1 (platform, emlib, peripherals, CLI, iostream, app_log, device init, DMA manager, CMSIS-Core port) | `firmware/simplicity_sdk_2026.6.1/` | Zlib | the subset the project uses, copied in by the Simplicity Studio project generator; `firmware/autogen/sbom/` holds Silicon Labs' bill of materials with the licence of every component |
-| Silicon Labs RAIL library (`librail_efr32xg24_gcc_release.a`) and RAIL utility plugins | `firmware/simplicity_sdk_2026.6.1/rail_library/` | Silicon Labs MSLA | binary radio library, redistributed for use on Silicon Labs devices under the Master Software License Agreement |
+| Silicon Labs Simplicity SDK 2026.6.1, Zlib parts (platform, emlib, peripherals, CLI, iostream, app_log, device init, DMA manager, CMSIS-Core port) | `firmware/simplicity_sdk_2026.6.1/` | Zlib | the subset the project uses, copied in by the Simplicity Studio project generator; `firmware/autogen/sbom/` holds Silicon Labs' bill of materials with the licence of every component |
+| Silicon Labs RAIL library (`librail_efr32xg24_gcc_release.a`) and the iostream printf glue (`iostream_printf.c/.h`) | **not in this repository** | Silicon Labs MSLA | the MSLA does not allow these to be shared on their own. They come with the Simplicity SDK 2026.6.1: importing `rc_module_trx.slcp` copies them in, and `build.ps1` copies any that are missing from the installed SDK. The prebuilt hex files contain the library built into the firmware, which the MSLA allows |
+| Silicon Labs RAIL headers and RAIL utility plugins | `firmware/simplicity_sdk_2026.6.1/rail_library/`, `rail_sdk/` | Zlib | |
 | Arm CMSIS-Core | `firmware/simplicity_sdk_2026.6.1/cmsis/` | Apache-2.0 | |
 | Tiny printf by Marco Paland | `firmware/simplicity_sdk_2026.6.1/printf/` | MIT | |
 | DIY Multiprotocol TX Module (Pascal Langer and contributors) | — | GPL-3.0 | the serial frame format the module takes from a transmitter (header, protocol, sub-protocol, RX number, option, 16 × 11-bit channels); the DSMX channel-list computation (`DSM_calc_dsmx_channel`) that `dsm_tx.c` / `dsm_rx.c` follow |
