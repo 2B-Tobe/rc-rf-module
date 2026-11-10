@@ -904,6 +904,49 @@ static void start_frame_timer(void)
                     (sl_rail_timer_callback_t)frame_timer_cb);
 }
 
+// ------------------------------------------------- a radio on J3 RX at power-up --
+// A board stored as a receiver (or set by jumpers, with no RANGE jumper) does not listen for serial frames. Put
+// into a radio bay it must still become the transmitter module, so at power-up it first looks at J3 RX (PA06):
+//   floating (nothing there: a receiver in a model) -> no delay, the board starts as set up;
+//   driven (a radio, an encoder or the controller box on it) -> up to BAY_PROBE_MS for MULTI frames, either
+//   polarity. Good frames -> the board STORES the transmitter setup ("cfg tx rlink", its single / dual kept) and
+//   restarts, so it comes up exactly as any stored transmitter does (a bind restart included). To make it a
+//   receiver again: the bind plug on servo connector 8 (RxSetup), the controller box or "cfg rx ...".
+#define BAY_PROBE_MS  2000u
+static bool j3_rx_driven(sl_rail_handle_t rh)
+{
+  sl_gpio_t rx = { .port = SL_GPIO_PORT_A, .pin = 6 };
+  bool up, down;
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 1);
+  uint32_t t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 300u) { }
+  up = !pin_low(&rx);
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 0);
+  t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 300u) { }
+  down = !pin_low(&rx);
+  sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 1);
+  return up == down;                                 // the pulls cannot move it: something drives the line
+}
+
+static bool bay_probe(sl_rail_handle_t rh)
+{
+  bay_init(rh, bay_on_frame);
+  uint32_t t0 = (uint32_t)sl_rail_get_time(rh), tpol = t0;
+  int32_t good0 = bay_diag[BAY_GOOD];
+  bool found = false;
+  for (;;) {
+    uint32_t now = (uint32_t)sl_rail_get_time(rh);
+    if (bay_diag[BAY_OK] >= 3) { found = true; break; }
+    if ((uint32_t)(now - t0) >= BAY_PROBE_MS * 1000u) break;
+    if (bay_diag[BAY_GOOD] != good0) { good0 = bay_diag[BAY_GOOD]; tpol = now; }
+    else if ((uint32_t)(now - tpol) >= BAY_POL_TRY_MS * 1000u) { tpol = now; bay_set_inverted(!bay_inverted()); }
+  }
+  NVIC_DisableIRQ(EUSART1_RX_IRQn);
+  NVIC_DisableIRQ(EUSART1_TX_IRQn);
+  EUSART_IntDisable(EUSART1, EUSART_IEN_RXFL);
+  EUSART_Enable(EUSART1, eusartDisable);           // PA06 back to the log UART alone
+  return found;
+}
+
 // ----------------------------------------------------------------- startup --
 static void proto_start(void)
 {
@@ -943,6 +986,27 @@ static void proto_start(void)
     is_rx = true;
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log("SETUP bind plug on servo connector 8: RLINK receiver for this power-up, waiting for setup packets (RxSetup)\r\n");
+#endif
+  }
+  if (!plug && !(cfg_used ? !is_rx : (!fs && pin_low(&range_pin))) && j3_rx_driven(rh)) {   // would not listen, J3 RX driven
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log("SETUP J3 RX is driven: looking %u ms for MULTI frames before starting as %s\r\n", (unsigned)BAY_PROBE_MS, is_rx ? "a receiver" : "PPM transmitter");
+#endif
+    if (bay_probe(rh)) {
+      cfg_t c;
+      memset(&c, 0, sizeof c);
+      c.role = CFG_ROLE_TX; c.proto = 0u; c.sub = 1u;                 // "cfg tx rlink": the frames choose the protocol anyway
+      c.option = cfg_used ? cfg_boot.option : 0u;
+      bool ok = cfg_save(&c);
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+      app_log("SETUP MULTI frames on J3 RX: %s, restarting as the transmitter module\r\n",
+              ok ? "transmitter setup stored" : "storing the transmitter setup FAILED");
+      { uint32_t t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 20000u) { } }
+#endif
+      if (ok) NVIC_SystemReset();
+    }
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    else app_log("SETUP no MULTI frames on J3 RX: starting as set up\r\n");
 #endif
   }
   if (is_rx) rx_outputs_boot(rh, cfg_used ? cfg_boot.outputs : 0u, plug);   // output layout, bind plug on servo connector 8

@@ -77,8 +77,9 @@ X7). It is the same firmware: the module tells the radios apart by itself, with 
 
 - **Telling the radios apart:** EdgeTX sends the same frames inverted and every 7 ms; an encoder sends them
   normal, every 22 ms. The module looks both ways up and at the frame rate.
-- **Setting the module up:** the board must be stored as a transmitter, as for an encoder. In the radio, set
-  Internal RF to OFF and External RF to MULTI.
+- **Setting the module up:** in the radio, set Internal RF to OFF and External RF to MULTI. A board stored as a
+  transmitter works straight away. A board stored as a receiver notices the radio's frames on J3 RX at start-up,
+  stores the transmitter setup by itself (single / dual kept) and restarts once as the transmitter module.
 - **The protocol list:** the module answers the radio's status and protocol-list requests, using the Multiprotocol
   numbers, so models made for a real 4-in-1 carry over:
   - FrSkyD (3) D8

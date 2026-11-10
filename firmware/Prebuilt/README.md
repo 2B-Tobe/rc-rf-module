@@ -1,6 +1,6 @@
 # Prebuilt firmware
 
-`rc_rf_module_1.4.hex`: built from this folder's sources on 8 November 2026 (1.4) and bench-tested with the MiTo
+`rc_rf_module_1.4.hex`: built from this folder's sources on 10 November 2026 (1.4) and bench-tested with the MiTo
 encoder and a FrSky Taranis Q X7 running EdgeTX. Flash it with pyOCD over SWD, no toolchain needed:
 
 ```
@@ -9,6 +9,9 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 
 ## Changes
 
+- **1.4 update (10 Nov 2026):** a board stored as a receiver, plugged into an EdgeTX radio's JR bay, now finds
+  the radio's frames at start-up, stores the transmitter setup by itself and restarts once as the transmitter
+  module. Bench-tested on the Taranis Q X7, including bind.
 - **1.4 (8 Nov 2026):** the module works in the JR bay of an EdgeTX radio as a MULTI (4-in-1) module, using
   Multiprotocol numbers, with MiTo (120) for nRF24 / RLINK / UK459. It shows the status, the protocol list and
   telemetry (`docs/SERIAL_INPUT.md` 2.3); the same firmware still serves the encoder. Single or dual band per
