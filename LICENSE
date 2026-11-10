@@ -8,12 +8,13 @@ any later version. The full text of the licence follows below.
 Additional permission under GNU GPL version 3 section 7
 
 If you modify this Program, or any covered work, by linking or combining it with the Silicon Labs RAIL
-library (for example librail_efr32xg24_gcc_release.a) and the other Silicon Labs components distributed
-with the Simplicity SDK under the Silicon Labs Master Software License Agreement, containing parts covered
-by the terms of that agreement, the licensor of this Program grants you additional permission to convey the resulting work. Corresponding Source for a non-source form
-of such a combination shall not include the source code for the parts of those Silicon Labs components
-that are not available in source form under that agreement, and those components are not covered by this
-License.
+library (librail_efr32xg24_gcc_release.a, which Silicon Labs distributes in binary form only, under the
+Zlib licence) or with other Silicon Labs components distributed with the Simplicity SDK under the Silicon
+Labs Master Software License Agreement, the licensor of this Program grants you additional permission to
+convey the resulting work. Corresponding Source for a non-source form of such a combination shall include
+the source code for the parts of this Program used, but need not include the source code of those Silicon
+Labs components that Silicon Labs does not provide in source form. Those components remain under their own
+licences and are not covered by this License.
 
 The Controller (controller/) is under the MIT licence, see controller/LICENSE.
 
