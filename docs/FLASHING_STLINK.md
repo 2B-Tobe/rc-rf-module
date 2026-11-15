@@ -8,7 +8,7 @@ transmitter module or a receiver. No USB-serial adapter, terminal program or con
 - An ST-Link V2 (an original or a clone) and three wires.
 - The module, powered from its normal supply.
 - A Windows PC with Python 3.
-- The files in `firmware/Prebuilt/`: the firmware `rc_rf_module_1.4.hex`, and the setup files in `setup/`.
+- The files in `firmware/Prebuilt/`: the firmware `rc_rf_module_1.5.hex`, and the setup files in `setup/`.
 
 ## 1. Prepare the PC (once)
 
@@ -40,7 +40,7 @@ J5 carries no supply: power the module as usual, from its own supply.
 In PowerShell, go to the folder with the files, then flash:
 ```
 cd C:\dev\rc-rf-module\firmware\Prebuilt
-python -m pyocd flash -t efr32mg24a420f1536im48 rc_rf_module_1.4.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 rc_rf_module_1.5.hex
 ```
 pyOCD ends with a line like `Erased … programmed … bytes`. The stored setup and the binds are kept: a firmware
 update never touches them.

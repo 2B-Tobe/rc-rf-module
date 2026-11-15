@@ -348,6 +348,12 @@ static void set_air_address(const uint8_t addr[4])
 // NVIC priority helps against that -- only a hardware capture is immune.
 static uint32_t ppm_cnt_mask = 0xFFFFFFFFu;     // TIMER0 counter span (TOP), for wrap-safe diffs
 static bool     ppm_sync_seen = false;
+// PPM on J3 RX (PA06) as well (1.5): a radio's bay pin 1 carries PPM or MULTI on the same wire. While a stored TX setup
+// waits for its input (bay_detect), PA06 also feeds TIMER0 CC1 (EXTI -> PRS ch 5); 3 PPM frames there and PRS ch 7
+// (TIMER0 CC0, the PPM capture above) is pointed at PA06 instead of PB01 for the rest of this power-up.
+static int32_t           ppm_pa06_int = -1;     // EXTI line of PA06 (-1: none)
+static volatile uint32_t ppm_pa06_syncs, ppm_pa06_edge;
+static bool              ppm_on_pa06;           // PPM is taken from PA06 (J3 RX) at this power-up
 
 static void ppm_capture(uint32_t now)           // now = the edge's captured time, 1 MHz ticks
 {
@@ -403,6 +409,16 @@ void TIMER0_IRQHandler(void)              // one capture per PPM edge, ~45 x 9 p
     TIMER_IntClear(TIMER0, TIMER_IF_CC0);
     ppm_capture(TIMER_CaptureGet(TIMER0, 0));
   }
+  while (TIMER_IntGet(TIMER0) & TIMER_IF_CC1) {   // PPM looked for on PA06
+    TIMER_IntClear(TIMER0, TIMER_IF_CC1);
+    uint32_t now = TIMER_CaptureGet(TIMER0, 1);
+    uint32_t dt = (now - ppm_pa06_edge) & ppm_cnt_mask;
+    ppm_pa06_edge = now;
+    static uint8_t n; static bool bad;                // a PPM frame: 4..16 channels of 0.7..2.2 ms, then a gap
+    if (dt > 3500u && dt < 30000u) { if (!bad && n >= 4u && n <= 16u) ppm_pa06_syncs++; n = 0; bad = false; }
+    else if (dt >= 700u && dt <= 2200u) { if (n < 255u) n++; }
+    else bad = true;                                  // serial bits (MULTI frames) are far shorter: never PPM
+  }
 }
 
 static void ppm_edge_cb(uint8_t interrupt_no, void *ctx)
@@ -453,6 +469,8 @@ static void inputs_init(void)
     cc.prsInputType = timerPrsInputAsyncLevel;
     cc.prsSel       = 7;
     TIMER_InitCC(TIMER0, 0, &cc);
+    cc.prsSel       = 5;                      // CC1: PPM looked for on J3 RX (PA06, PRS ch 5, set up by ppm_pa06_watch). A
+    TIMER_InitCC(TIMER0, 1, &cc);             // CC configuration only takes while the timer is still disabled: here
     ppm_cnt_mask = TIMER_TopGet(TIMER0);
     TIMER_IntClear(TIMER0, TIMER_IF_CC0);
     TIMER_IntEnable(TIMER0, TIMER_IEN_CC0);
@@ -656,9 +674,40 @@ static void bay_restart(const char *why)
   NVIC_SystemReset();
 }
 
+static void ppm_pa06_edge_cb(uint8_t interrupt_no, void *ctx) { (void)interrupt_no; (void)ctx; }   // never fires (PRS only)
+static void ppm_pa06_watch(bool on)             // TIMER0 CC1 <- PA06, for bay_detect
+{
+  if (on) {
+    if (ppm_pa06_int < 0) {
+      sl_gpio_t pa06 = { .port = SL_GPIO_PORT_A, .pin = 6 };
+      int32_t n = SL_GPIO_INTERRUPT_UNAVAILABLE;
+      if (sl_gpio_configure_external_interrupt(&pa06, &n, SL_GPIO_INTERRUPT_FALLING_EDGE,
+                                               (sl_gpio_irq_callback_t)ppm_pa06_edge_cb, NULL) != SL_STATUS_OK || n < 0) return;
+      ppm_pa06_int = n;
+      GPIO->IEN_CLR = (1u << (uint32_t)n);
+    }
+    PRS->ASYNC_CH[5].CTRL = PRS_ASYNC_CH_CTRL_FNSEL_A | PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO
+                          | ((uint32_t)ppm_pa06_int << _PRS_ASYNC_CH_CTRL_SIGSEL_SHIFT);
+    TIMER_IntClear(TIMER0, TIMER_IF_CC1);       // CC1 itself was set up with CC0 in inputs_init (the timer runs now)
+    TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
+  } else {
+    TIMER_IntDisable(TIMER0, TIMER_IEN_CC1);
+    TIMER_IntClear(TIMER0, TIMER_IF_CC1);
+  }
+}
+static void ppm_use_pa06(void)                  // PPM from PA06 from now on: the PPM capture (PRS ch 7) follows that pin
+{
+  ppm_pa06_watch(false);
+  if (ppm_pa06_int < 0) return;
+  PRS->ASYNC_CH[7].CTRL = PRS_ASYNC_CH_CTRL_FNSEL_A | PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO
+                        | ((uint32_t)ppm_pa06_int << _PRS_ASYNC_CH_CTRL_SIGSEL_SHIFT);
+  ppm_on_pa06 = true;
+}
+
 // Encoder mode at power-up: wait for 3 good MULTI frames (*f = the latest), however long the encoder takes.
 // Both LEDs blink together while it waits; the log reminds every BAY_WAIT_LOG_MS.
-// Waits for the encoder's MULTI frames: true. ppm_too (a stored TX setup, F/S open): PPM frames on PB01 count as
+// Waits for the encoder's MULTI frames: true. ppm_too (a stored TX setup, F/S open): PPM frames on PB01, or on J3 RX
+// (PA06, where a radio's bay pin 1 goes: External RF = PPM), count as
 // well, and whichever input brings 3 frames first wins - false = PPM, the stored protocol runs on it.
 // The polarity is searched as well: normal (encoder) and inverted (EdgeTX) in turn, BAY_POL_TRY_MS each, until
 // the frames check out (read the wrong way up they never do).
@@ -666,23 +715,26 @@ static bool bay_detect(sl_rail_handle_t rh, bay_frame_t *f, bool ppm_too)
 {
   uint32_t t0 = (uint32_t)sl_rail_get_time(rh), tl = t0, tlog = t0, tpol = t0;
   uint32_t s0 = ppm_syncs;
+  if (ppm_too) ppm_pa06_watch(true);                             // PPM on J3 RX counts too (a radio's bay pin 1)
+  uint32_t a0 = ppm_pa06_syncs;
   int32_t  ok0 = bay_diag[BAY_OK], good0 = bay_diag[BAY_GOOD];
   for (;;) {
     uint32_t now = (uint32_t)sl_rail_get_time(rh);
-    if (bay_diag[BAY_OK] - ok0 >= 3 && bay_get(f)) return true;  // 3 good frames: about 66 ms (EdgeTX 21 ms)
+    if (bay_diag[BAY_OK] - ok0 >= 3 && bay_get(f)) { ppm_pa06_watch(false); return true; }  // 3 good frames: about 66 ms (EdgeTX 21 ms)
     if (bay_diag[BAY_GOOD] != good0) { good0 = bay_diag[BAY_GOOD]; tpol = now; }   // frames this way up: stay
     if (bay_diag[BAY_OK] == ok0 && (uint32_t)(now - tpol) >= BAY_POL_TRY_MS * 1000u) {   // none yet: the other way up
       tpol = now;
       bay_set_inverted(!bay_inverted());
     }
-    if (ppm_too && (uint32_t)(ppm_syncs - s0) >= 3u) return false;   // 3 PPM frames: about 66 ms
+    if (ppm_too && (uint32_t)(ppm_syncs - s0) >= 3u) { ppm_pa06_watch(false); return false; }   // 3 PPM frames: about 66 ms
+    if (ppm_too && (uint32_t)(ppm_pa06_syncs - a0) >= 3u && bay_diag[BAY_OK] == ok0) { ppm_use_pa06(); return false; }   // PPM on J3 RX
     sl_cli_instances_tick();                                     // the "cfg" command works while we wait (programmer on J3)
     if ((uint32_t)(now - tl) >= 150000u) { tl = now; led_a_toggle(); led_b_toggle(); }
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
     if ((uint32_t)(now - tlog) >= BAY_WAIT_LOG_MS * 1000u) {
       tlog = now;
       app_log("BAY still waiting for MULTI frames on PA06%s (%lu s), normal or inverted: serial output -> J3 RX? EdgeTX: External RF = MULTI, bay pin 1 -> J3 RX? bytes %ld, header %ld (last %02lX), parity/framing %ld\r\n",
-              ppm_too ? " or PPM on PB01" : "", (unsigned long)((uint32_t)(now - t0) / 1000000u), (long)bay_diag[BAY_BYTES], (long)bay_diag[BAY_HDR],
+              ppm_too ? " or PPM on PB01 / PA06" : "", (unsigned long)((uint32_t)(now - t0) / 1000000u), (long)bay_diag[BAY_BYTES], (long)bay_diag[BAY_HDR],
               (unsigned long)bay_diag[BAY_LASTHDR], (long)bay_diag[BAY_ERR]);
     }
 #endif
@@ -1056,7 +1108,7 @@ static void proto_start(void)
   if (bay_listen) {
     bay_init(rh, bay_on_frame);
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log(bay_auto ? "BAY v1.4 stored TX setup, no F/S: MULTI frames on PA06 = encoder control, PPM on PB01 = the stored protocol; waiting for either\r\n"
+    app_log(bay_auto ? "BAY v1.5 stored TX setup, no F/S: MULTI frames on PA06 = encoder control, PPM on PB01 or PA06 = the stored protocol; waiting for either\r\n"
           : cfg_used ? "BAY v1.1 stored TX setup, F/S low: encoder control; waiting for MULTI frames on PA06\r\n"
                      : "BAY v1.1 RANGE jumper at power-up: encoder control, other jumpers ignored; waiting for MULTI frames on PA06\r\n");
 #endif
@@ -1079,8 +1131,10 @@ static void proto_start(void)
       EUSART_IntDisable(EUSART1, EUSART_IEN_RXFL);
       EUSART_Enable(EUSART1, eusartDisable);      // PA06 back to the log UART alone: its command line keeps listening
       bay_listen = false;
+      if (ppm_on_pa06) EUSART0->CMD = EUSART_CMD_RXDIS;   // ... unless the PPM comes in on it: the command line stops listening
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-      app_log("BAY PPM on PB01 came first: the stored protocol on PPM input, encoder serial off until the next power-up\r\n");
+      app_log(ppm_on_pa06 ? "BAY PPM on J3 RX (PA06, a radio's bay pin 1) came first: the stored protocol on PPM input, encoder serial and the command line off until the next power-up\r\n"
+                          : "BAY PPM on PB01 came first: the stored protocol on PPM input, encoder serial off until the next power-up\r\n");
 #endif
     }
   }
