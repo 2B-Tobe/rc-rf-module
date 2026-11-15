@@ -10,6 +10,11 @@ widths 1000–2000 µs (1500 centre), any frame length (the usual 22.5 ms). Chan
 as received; the receiver's servo 1 is the first PPM channel. No PPM for 100 ms = input lost → the
 receiver goes to failsafe.
 
+From 1.5 a stored transmitter setup (F/S open) also takes PPM on J3 RX (PA06), the pin a radio's module-bay
+pin 1 is wired to. So a radio with External RF set to PPM works on the same wiring as one set to MULTI: the
+module waits for either and uses whichever brings three frames first. With PPM on J3 RX the `cfg` command
+line is off until the next power-up (the pin is in use).
+
 Which protocol runs: the stored setup (section 3) or the PC00–PC02 jumpers. BIND fitted at power-up =
 bind; RANGE fitted = range check (low power); F/S open = transmitter.
 

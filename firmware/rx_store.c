@@ -61,7 +61,7 @@ static bool rx_store_write_all(const rx_record_t *recs)
 bool rx_store_save(uint8_t slot, rx_record_t *r)
 {
   if (slot >= RX_STORE_SLOTS) return false;
-  rx_record_t all[RX_STORE_SLOTS];
+  static rx_record_t all[RX_STORE_SLOTS];        /* static: keeps 640 bytes off the 2 KB stack (main loop only) */
   for (uint8_t i = 0; i < RX_STORE_SLOTS; i++) if (!rx_store_load(i, &all[i])) memset(&all[i], 0, sizeof(all[i]));
   r->magic = RX_STORE_MAGIC;
   r->crc = rx_store_crc(r);
@@ -75,7 +75,7 @@ bool rx_store_save(uint8_t slot, rx_record_t *r)
 void rx_store_clear(uint8_t slot)
 {
   if (slot >= RX_STORE_SLOTS) return;
-  rx_record_t all[RX_STORE_SLOTS];
+  static rx_record_t all[RX_STORE_SLOTS];        /* static: keeps 640 bytes off the 2 KB stack (main loop only) */
   for (uint8_t i = 0; i < RX_STORE_SLOTS; i++) if (!rx_store_load(i, &all[i])) memset(&all[i], 0, sizeof(all[i]));
   memset(&all[slot], 0, sizeof(all[slot]));
   (void)rx_store_write_all(all);
