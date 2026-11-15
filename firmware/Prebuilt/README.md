@@ -1,14 +1,18 @@
 # Prebuilt firmware
 
-`rc_rf_module_1.4.hex`: built from this folder's sources on 10 November 2026 (1.4) and bench-tested with the MiTo
+`rc_rf_module_1.5.hex`: built from this folder's sources on 15 November 2026 (1.5) and bench-tested with the MiTo
 encoder and a FrSky Taranis Q X7 running EdgeTX. Flash it with pyOCD over SWD, no toolchain needed:
 
 ```
-python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.4.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.5.hex
 ```
 
 ## Changes
 
+- **1.5 (15 Nov 2026):** a stored transmitter setup also takes PPM on J3 RX (PA06), the pin a radio's bay pin 1
+  is wired to, so a radio with External RF set to PPM works on the same wiring as MULTI; the module uses
+  whichever brings three frames first. On the Taranis Q X7 the PPM frames were read from the bay and MULTI
+  worked as before (protocol changes, nRF24 to flight). The binding store's work area is off the stack.
 - **1.4 update (10 Nov 2026):** a board stored as a receiver, plugged into an EdgeTX radio's JR bay, now finds
   the radio's frames at start-up, stores the transmitter setup by itself and restarts once as the transmitter
   module. Bench-tested on the Taranis Q X7, including bind.
@@ -39,7 +43,7 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 To refresh it after a build and a bench test:
 
 ```
-Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.4.hex
+Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.5.hex
 ```
 
 ## Setting a board up with only an SWD programmer
@@ -50,7 +54,7 @@ The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
 
 ## Licence of the hex files
 
-The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.4.hex` also contains Silicon Labs software:
+The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.5.hex` also contains Silicon Labs software:
 the RAIL radio library (Zlib) and parts used under the Silicon Labs Master Software License Agreement
 (https://www.silabs.com/about-us/legal/master-software-license-agreement). Those Silicon Labs parts may be used
 only as part of this firmware on Silicon Labs devices; they may not be extracted, redistributed on their own or
