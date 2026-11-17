@@ -1,10 +1,11 @@
 # Prebuilt firmware
 
-`rc_rf_module_1.5.hex`: built from this folder's sources on 15 November 2026 (1.5) and bench-tested with the MiTo
-encoder and a FrSky Taranis Q X7 running EdgeTX. Flash it with pyOCD over SWD, no toolchain needed:
+`rc_rf_module_1.7.hex`: built from this folder's sources on 17 November 2026 (1.7) and bench-tested on the author's
+boards: the TX panel, and Futaba S-FHSS and FASST between two boards of this kind (experimental, not yet with Futaba
+equipment: `docs/FUTABA.md`). Flash it with pyOCD over SWD, no toolchain needed:
 
 ```
-python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.5.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.7.hex
 ```
 
 ## Changes
@@ -13,9 +14,8 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
   and receiver roles, at +10 dBm, from EdgeTX, the Controller (1.4), `cfg` and the TX panel. Bench-tested between
   two boards of this kind only, **not yet with Futaba equipment** (`docs/FUTABA.md`). The binding store has 12
   slots (S-FHSS and FASST receivers in 8 and 9); slots written by 1.6 and earlier are kept.
-- **1.6 (17 Nov 2026), source only for now:** the TX panel (`docs/TX_PANEL.md`): a display, three or four buttons
-  and a red / green LED wired to pins the board already has. A board without the display runs as 1.5. The hex
-  follows here once this build has been bench-tested; until then build it from the sources (`firmware/README.md`).
+- **1.6 (17 Nov 2026):** the TX panel (`docs/TX_PANEL.md`): a display, three or four buttons and a red / green LED
+  wired to pins the board already has. A board without the display runs as 1.5. Bench-tested as part of 1.7.
 - **1.5 (15 Nov 2026):** a stored transmitter setup also takes PPM on J3 RX (PA06), the pin a radio's bay pin 1
   is wired to, so a radio with External RF set to PPM works on the same wiring as MULTI; the module uses
   whichever brings three frames first. On the Taranis Q X7 the PPM frames were read from the bay and MULTI
@@ -50,7 +50,7 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 To refresh it after a build and a bench test:
 
 ```
-Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.5.hex
+Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.7.hex
 ```
 
 ## Setting a board up with only an SWD programmer
@@ -61,7 +61,7 @@ The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
 
 ## Licence of the hex files
 
-The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.5.hex` also contains Silicon Labs software:
+The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.7.hex` also contains Silicon Labs software:
 the RAIL radio library (Zlib) and parts used under the Silicon Labs Master Software License Agreement
 (https://www.silabs.com/about-us/legal/master-software-license-agreement). Those Silicon Labs parts may be used
 only as part of this firmware on Silicon Labs devices; they may not be extracted, redistributed on their own or
