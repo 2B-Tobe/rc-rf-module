@@ -45,6 +45,8 @@ Protocol / sub-protocol numbers the module answers to:
 | FrSky D8 | 3 | any |
 | FrSky D16 | 15 | 0 = v1 EU-LBT, 1 = v2 EU-LBT, 2 = v1 FCC, 3 = v2 FCC, 5 = v1 FCC channels 1–8 only |
 | DSMX 22 ms | 6 | 2 |
+| Futaba S-FHSS — **experimental** (see `FUTABA.md`) | 21 | 0 |
+| Futaba FASST 10ch — **experimental** (see `FUTABA.md`) | 110 | 0 |
 
 Anything else: RF off, both LEDs alternate, the log says why.
 
@@ -91,11 +93,13 @@ X7). It is the same firmware: the module tells the radios apart by itself, with 
   - DSM (6) DSMX_1F / DSMX_2F
   - FrSkyX (15) CH_16 / CH_8 / EU_16
   - FrSkyX2 (64) CH_16 / EU_16
+  - Futaba (21) SFHSS — experimental
+  - FASST (110) 10CH — experimental (110 is mpm-v2's number; Multiprotocol has no FASST)
   - **MiTo (120)** nRF24 / RLINK / UK459
   - Anything else shows "Protocol invalid".
 - **Single or dual band** (the 459 MHz link beside 2.4 GHz, where the RA-01 is fitted), set per model:
   - MiTo: Option value 0 = single, any other value = dual.
-  - FrSkyD, FrSkyX, FrSkyX2: Option value 1 = dual, anything else single.
+  - FrSkyD, FrSkyX, FrSkyX2, Futaba, FASST: Option value 1 = dual, anything else single.
   - DSM: EdgeTX fills the option byte itself, so its **Max throw** box switches dual on.
   - Dual only helps a receiver that is a MiTo board with the RA-01. A FrSky or Spektrum receiver hears
     2.4 GHz only.
@@ -125,7 +129,7 @@ A transmitter with input present answers `CFG refused ...` and changes nothing.
 | `cfg bind` | restart with BIND counted as held for 8 s | `CFG bind: restarting with BIND held for 8 s` |
 | `cfg clear` | erase the setup, restart | `CFG cleared: the jumpers decide again. Restarting` |
 
-`<mode>`: `nrf24 rlink uk d8 d16 dsmx jeti txtest dsmcap`, or the two numbers `Prot Sub` from the table
+`<mode>`: `nrf24 rlink uk d8 d16 dsmx sfhss fasst jeti txtest dsmcap`, or the two numbers `Prot Sub` from the table
 above (`cfg rx 0 1`). Errors: `CFG unknown protocol '...'`, `CFG Prot n Sub n is not a receiver mode of
 this module`, `CFG usage: ...`. The LEDs confirm: both together 3× = accepted, alternating fast 2 s =
 refused.

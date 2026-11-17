@@ -77,6 +77,8 @@ If the link comes up inside the 8 s, the receiver also stores that moment's posi
 | D16v2 FCC | D16 v2 FCC | yes | 15 / 3 |
 | D16 FCC8 | D16 v1 FCC, ch 1–8 | yes | 15 / 5 |
 | DSMX | yes (22 ms) | yes | 6 / 2 |
+| S-FHSS | yes, experimental | yes, experimental | 21 / 0 |
+| FASST | yes, experimental | this kind of board, experimental | 110 / 0 |
 | Jeti cap | tool | tool | 0 / 6 |
 | TX test | carrier | — | 0 / 7 |
 | DSM cap | — | tool | 0 / 4 |

@@ -6,9 +6,9 @@
  * leaves the page alone, so a board is set up once.
  *
  *   cfg                      show the stored setup and what is running now
- *   cfg tx <proto> [dual]    transmitter; proto nrf24 rlink uk d8 d16 dsmx jeti txtest (or Prot Sub numbers);
+ *   cfg tx <proto> [dual]    transmitter; proto nrf24 rlink uk d8 d16 dsmx sfhss fasst jeti txtest (or Prot Sub numbers);
  *                            dual = 459 MHz link beside it (PPM input; with the encoder its Opt decides)
- *   cfg rx <proto> [layout]  receiver; proto nrf24 rlink uk d8 d16 dsmx dsmcap jeti; layout 8pwm (default) 5sbus
+ *   cfg rx <proto> [layout]  receiver; proto nrf24 rlink uk d8 d16 dsmx sfhss fasst dsmcap jeti; layout 8pwm (default) 5sbus
  *                            5ppm 5both: SBUS on servo connector 6, PPM on connector 7 (or 0..3)
  *   cfg clear                erase: the jumpers decide again, as before
  *   cfg bind                 restart with BIND counted as held for 8 s (bind without the jumper; a receiver that

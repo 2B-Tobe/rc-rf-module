@@ -9,6 +9,10 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 
 ## Changes
 
+- **1.7 (17 Nov 2026), experimental Futaba modes:** Futaba S-FHSS (Prot 21) and FASST 10ch (Prot 110), transmitter
+  and receiver roles, at +10 dBm, from EdgeTX, the Controller (1.4), `cfg` and the TX panel. Bench-tested between
+  two boards of this kind only, **not yet with Futaba equipment** (`docs/FUTABA.md`). The binding store has 12
+  slots (S-FHSS and FASST receivers in 8 and 9); slots written by 1.6 and earlier are kept.
 - **1.6 (17 Nov 2026), source only for now:** the TX panel (`docs/TX_PANEL.md`): a display, three or four buttons
   and a red / green LED wired to pins the board already has. A board without the display runs as 1.5. The hex
   follows here once this build has been bench-tested; until then build it from the sources (`firmware/README.md`).

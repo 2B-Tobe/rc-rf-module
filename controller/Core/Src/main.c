@@ -27,7 +27,7 @@
 #include "link.h"
 #include <string.h>
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 /* ------------------------------------------------------------------ the module's modes, in Prot / Sub numbering */
 typedef struct {
@@ -48,6 +48,8 @@ static const mode_t modes[] = {
   { 15, 3, "D16v2 FCC", true,  true,  true  },   /* ACCST D16 v2 FCC */
   { 15, 5, "D16 FCC8",  true,  true,  true  },   /* ACCST D16 v1 FCC, channels 1-8 only */
   {  6, 2, "DSMX",      true,  true,  true  },   /* DSMX 22 ms */
+  { 21, 0, "S-FHSS",    true,  true,  true  },   /* Futaba S-FHSS; experimental */
+  { 110, 0, "FASST",    true,  true,  true  },   /* Futaba FASST 10ch; receiver: for a transmitter board of this kind; experimental */
   {  0, 6, "Jeti cap",  true,  true,  false },
   {  0, 7, "TX test",   true,  false, false },
   {  0, 4, "DSM cap",   false, true,  false },

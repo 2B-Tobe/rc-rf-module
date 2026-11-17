@@ -84,6 +84,8 @@ static volatile bool fs_cmd_log = false;
 // EU build: DSMX 22 ms only (dsm_tx.c v1.14). Set 0 for use outside the EU, where 11 ms is allowed.
 #define DTX_EU_LOCK 1
 #include "dsm_tx.c"
+#include "sfhss.c"      // Futaba S-FHSS transmitter and receiver (Multi protocol 21), experimental
+#include "fasst.c"      // Futaba FASST 10ch transmitter (protocol 110, as mpm-v2), experimental
 #include "tx_test.c"
 #include "bay_serial.c" // encoder MULTI frames on PA06 (EUSART1 RX): protocol, channels, BIND, RANGE
 #include "etx_multi.c"  // ... or an EdgeTX radio's (inverted): the module answers as a Multiprotocol module
@@ -194,7 +196,7 @@ static sl_gpio_t proto1_pin = { .port = SL_GPIO_PORT_C, .pin = 1 }; // PROTOCOL_
 static sl_gpio_t proto2_pin = { .port = SL_GPIO_PORT_C, .pin = 2 }; // PROTOCOL_02, act.low
 // Protocol select at boot: all floating -> nRF24 (+ F/S low = nRF24 receiver); PC02 low -> RLINK (PC01 ignored);
 // PC00 low -> FrSky D8; PC01 low -> FrSky D16 (v1 EU-LBT)
-typedef enum { PROTO_NRF24 = 0, PROTO_D8, PROTO_D16, PROTO_RLINK, PROTO_DSMCAP, PROTO_DSMRX, PROTO_DSMTX, PROTO_TXTEST, PROTO_JETICAP, PROTO_UKONLY, PROTO_UKRX } proto_t;
+typedef enum { PROTO_NRF24 = 0, PROTO_D8, PROTO_D16, PROTO_RLINK, PROTO_DSMCAP, PROTO_DSMRX, PROTO_DSMTX, PROTO_TXTEST, PROTO_JETICAP, PROTO_UKONLY, PROTO_UKRX, PROTO_SFHSS, PROTO_FASST } proto_t;
 static proto_t proto = PROTO_NRF24;
 static bool    nrf_rx_role = false;      // nRF24 + F/S low at boot: receiver role (nrf24_rx.c)
 static bool    uk_have_sx  = false;      // DUAL: an SX1278 answered at power-up
@@ -597,6 +599,10 @@ static bool cfg_map(uint8_t prot, uint8_t sub, bool rx, proto_t *p)
     case 6u:  if (sub == 2u || (sub == 3u && !DTX_EU_LOCK)) { *p = rx ? PROTO_DSMRX : PROTO_DSMTX; return true; }   // Multi "DSM": DSMX 22 / 11 ms
               return false;                                                     // 11 ms: not in the EU build
     case 15u: *p = PROTO_D16; return true;                                        // Multi "FrSkyX", any Sub
+    case 21u: if (sub <= 2u) { *p = PROTO_SFHSS; return true; }                   // Multi "Futaba" S-FHSS, transmitter and receiver (Sub 1, 2: setups stored by v0.3, the same now)
+              return false;
+    case 110u: if (sub == 0u) { *p = PROTO_FASST; return true; }                  // Futaba FASST 10ch (mpm-v2's number; not in Multiprotocol); receiver: for a board of this kind
+              return false;
     default:  return false;
   }
 }
@@ -617,6 +623,8 @@ static const char *bay_role_name(const bay_frame_t *f)
       static const char *const d16n[4] = { "FrSky D16 v1 EU-LBT", "FrSky D16 v2 EU-LBT", "FrSky D16 v1 FCC", "FrSky D16 v2 FCC" };
       return (f->sub == 5u) ? "FrSky D16 v1 FCC 8 ch" : d16n[f->sub & 3u]; }
     case PROTO_DSMTX:  return (f->sub == 3u) ? "DSMX 11 ms" : "DSMX 22 ms";
+    case PROTO_SFHSS:  return "Futaba S-FHSS";
+    case PROTO_FASST:  return "Futaba FASST 10ch";
     default:           return "?";
   }
 }
@@ -925,6 +933,8 @@ static const char *proto_name(proto_t p, bool rx)
     case PROTO_JETICAP: return "Jeti capture";
     case PROTO_UKONLY:  return "UK only (459 MHz)";
     case PROTO_UKRX:    return "UK 459 MHz receiver";
+    case PROTO_SFHSS:   return rx ? "Futaba S-FHSS receiver" : "Futaba S-FHSS";
+    case PROTO_FASST:   return rx ? "FASST receiver (MiTo boards)" : "Futaba FASST 10ch";
     default:            return "?";
   }
 }
@@ -1249,7 +1259,7 @@ static void proto_start(void)
 #endif
   uk_have_sx = uk_probe(rh);
   if (uk_have_sx) {
-    bool rx_role = is_rx && (nrf_rx_role || proto == PROTO_D8 || proto == PROTO_D16 || proto == PROTO_DSMRX || proto == PROTO_RLINK);
+    bool rx_role = is_rx && (nrf_rx_role || proto == PROTO_D8 || proto == PROTO_D16 || proto == PROTO_DSMRX || proto == PROTO_RLINK || proto == PROTO_SFHSS || proto == PROTO_FASST);
     if (proto == PROTO_UKRX) { /* the receiver role takes the SX1278 itself (uk_rx_start in the main loop) */ }
     else if (rx_role && !bay_unsupported) {                  // DUAL receiver: the 459 MHz receiver runs beside the 2.4 GHz one
       uk_dual_rx = true;
@@ -1340,7 +1350,9 @@ void app_process_action(void)
            : proto == PROTO_D8    ? frsky_rx_fresh(now, DUAL_RX_SWITCH_US)
            : proto == PROTO_D16   ? frsky16_rx_fresh(now, DUAL_RX_SWITCH_US)
            : proto == PROTO_DSMRX ? dsm_rx_fresh(now, DUAL_RX_SWITCH_US)
-           : proto == PROTO_RLINK ? rlink_rx_fresh(now, DUAL_RX_SWITCH_US) : true;
+           : proto == PROTO_RLINK ? rlink_rx_fresh(now, DUAL_RX_SWITCH_US)
+           : proto == PROTO_SFHSS ? sfhss_rx_fresh(now, DUAL_RX_SWITCH_US)
+           : proto == PROTO_FASST ? fasst_rx_fresh(now, DUAL_RX_SWITCH_US) : true;
     bool u = uk_rx_fresh(now, DUAL_RX_UK_HOLD_US);
     bool want = !p && u;
     if (want != servo_out_overridden()) {
@@ -1433,6 +1445,33 @@ void app_process_action(void)
       dsm_tx_input((int32_t)(now - last) <= 100000); }
     dsm_tx_range(range_in());   // RANGE followed at any time
     dsm_tx_action();
+    return;
+  }
+  if (proto == PROTO_SFHSS) {   // Futaba S-FHSS transmitter or receiver (serial frames or a stored setup: Prot 21)
+    static bool sf_started = false;
+    if (!sf_started) {
+      sf_started = true;
+      (void)sfhss_start(rh, contrl_pos, range_in(), is_rx && !bay_mode, bind_held());
+    }
+    if (rx_held) { rx_held = false; sfhss_rx_process(); }
+    if (is_rx && !bay_mode) { sfhss_rx_service(bind_held()); return; }
+    { uint32_t last = ppm_last_sync;
+      uint32_t now  = (uint32_t)sl_rail_get_time(rh);
+      sfhss_input((int32_t)(now - last) <= 100000); }
+    sfhss_range(range_in());
+    sfhss_action();
+    return;
+  }
+  if (proto == PROTO_FASST) {   // Futaba FASST 10ch transmitter, or receiver for a board of this kind (serial frames or a stored setup: Prot 110), experimental
+    static bool fa_started_once = false;
+    if (!fa_started_once) { fa_started_once = true; (void)fasst_start(rh, contrl_pos, range_in(), is_rx && !bay_mode, bind_held()); }
+    if (rx_held) { rx_held = false; fasst_rx_process(); }
+    if (is_rx && !bay_mode) { fasst_rx_service(bind_held()); return; }
+    { uint32_t last = ppm_last_sync;
+      uint32_t now  = (uint32_t)sl_rail_get_time(rh);
+      fasst_input((int32_t)(now - last) <= 100000); }
+    fasst_range(range_in());
+    fasst_action();
     return;
   }
   if (proto == PROTO_DSMRX) {   // DSMX receiver (PC00 + PC01 + F/S): PPM, servos out
@@ -1625,6 +1664,8 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rh, sl_rail_events_t eve
   if (proto == PROTO_DSMCAP) dsm_cap_on_events(events);   // raw-capture FIFO overflow -> restart RX
   if (proto == PROTO_JETICAP) jeti_cap_on_events(events); // sniffer: overflow -> restart RX, counters
   if (proto == PROTO_DSMTX) dsm_tx_on_events(events);
+  if (proto == PROTO_SFHSS) sfhss_on_events(events);     // packet B is launched from here
+  if (proto == PROTO_FASST) fasst_on_events(events);     // the next packet is launched from here
   if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
     (void)sl_rail_hold_rx_packet(rh);   // keep it in the FIFO for the main loop
     rx_held = true;

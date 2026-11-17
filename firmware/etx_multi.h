@@ -12,6 +12,8 @@
  *   DSM      (6)   DSMX_1F / DSMX_2F       -> DSMX 22 ms / 11 ms (11 ms not in the EU build; DSM2 not in this module)
  *   FrSkyX   (15)  CH_16 / CH_8 / EU_16    -> D16 ACCST v1 FCC / FCC 8 channels / EU-LBT (module Sub 2 / 5 / 0)
  *   FrSkyX2  (64)  CH_16 / -    / EU_16    -> D16 ACCST v2 FCC / EU-LBT (module Sub 3 / 1)
+ *   Futaba   (21)  SFHSS                   -> Futaba S-FHSS, transmitter (experimental: links between two boards of this kind)
+ *   FASST    (110) 10CH                    -> Futaba FASST 10ch, transmitter (experimental; mpm-v2's number, not in Multiprotocol)
  *   MiTo     (120) nRF24 / RLINK / UK459   -> Tobe's own links (the encoder's Prot 0 Sub 0 / 1 / 2)
  * Single / dual band (the 459 MHz link beside 2.4 GHz, where the RA-01 is fitted), per model in EdgeTX (v1.1):
  *   MiTo: Option value 0 = single, any other = dual;  FrSkyD / FrSkyX / FrSkyX2: Option value 1 = dual, else single;

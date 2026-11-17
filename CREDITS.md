@@ -14,8 +14,9 @@
 | Silicon Labs RAIL headers and RAIL utility plugins | `firmware/simplicity_sdk_2026.6.1/rail_library/`, `rail_sdk/` | Zlib | |
 | Arm CMSIS-Core | `firmware/simplicity_sdk_2026.6.1/cmsis/` | Apache-2.0 | |
 | Tiny printf by Marco Paland | `firmware/simplicity_sdk_2026.6.1/printf/` | MIT | |
-| DIY Multiprotocol TX Module (Pascal Langer and contributors) | — | GPL-3.0 | the serial frame format the module takes from a transmitter (header, protocol, sub-protocol, RX number, option, 16 × 11-bit channels); the DSMX channel-list computation (`DSM_calc_dsmx_channel`) that `dsm_tx.c` / `dsm_rx.c` follow |
-| Deviation (deviationtx) | — | GPL-3.0 | the CYRF6936 PN code tables and the DSM2/DSMX framing (SOP, SDR/8DR symbols) that the DSM modes reproduce in software on the EFR32 radio |
+| DIY Multiprotocol TX Module (Pascal Langer and contributors) | — | GPL-3.0 | the serial frame format the module takes from a transmitter (header, protocol, sub-protocol, RX number, option, 16 × 11-bit channels); the DSMX channel-list computation (`DSM_calc_dsmx_channel`) that `dsm_tx.c` / `dsm_rx.c` follow; the Futaba S-FHSS radio settings, packet and timing (`Futaba_cc2500.ino`) that `sfhss.c` follows |
+| Deviation (deviationtx) | — | GPL-3.0 | the CYRF6936 PN code tables and the DSM2/DSMX framing (SOP, SDR/8DR symbols) that the DSM modes reproduce in software on the EFR32 radio; through Multiprotocol, the S-FHSS radio settings and packet (`sfhss_cc2500.c`) |
+| mpm-v2 by Raphael Coeffic (github.com/raphaelcoeffic/mpmv2) | `firmware/fasst.c` (framing ported from `src/core/fasst_frame.c`) | GPL-3.0 | everything known here about Futaba FASST (traced from a TM-10 module and an R6008HS): the chips, framing, hop rule, whitening and failsafe types; the S-FHSS CRC form, measured on a CC2500 |
 | FrSky D8 / D16 (ACCST) protocol descriptions | — | — | as documented by the Multiprotocol and Deviation projects and the open-source RC community; implemented here from those descriptions |
 | Futaba S.BUS frame format | — | — | public description |
 | Multiprotocol telemetry format ("MP" frames: status, protocol list, FrSky hub / S.Port) | — | GPL-3.0 | as defined by the DIY Multiprotocol TX Module, so an EdgeTX radio sees the module as a MULTI module (`etx_multi.c`) |
