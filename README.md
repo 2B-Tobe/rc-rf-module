@@ -46,9 +46,9 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 
 ## Regulatory note
 
-The 2.4 GHz side is built for EU use: DSMX at 22 ms only and 18 dBm, FrSky D16 EU-LBT (Sub 0/1) with listen-before-talk (the D16 FCC versions, Sub 2/3/5, are for receivers with FCC firmware and have none), RLINK
+The 2.4 GHz side: every mode flies at the module's full power (about +19.5 dBm); DSMX at 22 ms only, FrSky D16 EU-LBT (Sub 0/1) with listen-before-talk (the D16 FCC versions, Sub 2/3/5, are for receivers with FCC firmware and have none), RLINK
 with a clear-channel check before every packet. The experimental Futaba modes (S-FHSS, FASST) have no
-listen-before-talk and run at +10 dBm; keep them to the bench until they have been proven. The 459 MHz link uses the UK 458.5–459.5 MHz model-control
+listen-before-talk. The 459 MHz link uses the UK 458.5–459.5 MHz model-control
 band at 100 mW; check what your country allows before fitting the RA-01.
 
 ## Licence

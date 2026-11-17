@@ -1,15 +1,18 @@
 # Prebuilt firmware
 
-`rc_rf_module_1.7.hex`: built from this folder's sources on 17 November 2026 (1.7) and bench-tested on the author's
-boards: the TX panel, and Futaba S-FHSS and FASST between two boards of this kind (experimental, not yet with Futaba
-equipment: `docs/FUTABA.md`). Flash it with pyOCD over SWD, no toolchain needed:
+`rc_rf_module_1.8.hex`: built from this folder's sources on 17 November 2026 (1.8) and tested on the author's
+boards: the TX panel, Futaba S-FHSS and FASST between two boards of this kind (experimental, not yet with Futaba
+equipment: `docs/FUTABA.md`), full power in every mode. Flash it with pyOCD over SWD, no toolchain needed:
 
 ```
-python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.7.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.8.hex
 ```
 
 ## Changes
 
+- **1.8 (17 Nov 2026):** full flight power in every mode: S-FHSS and FASST (were +10 dBm) and DSMX (were 18 dBm at
+  22 ms, 15 dBm at 11 ms) now at the module maximum, about +19.5 dBm, as the other modes. The power shown on the TX
+  panel and in EdgeTX is rounded (19.5 reads 20).
 - **1.7 (17 Nov 2026), experimental Futaba modes:** Futaba S-FHSS (Prot 21) and FASST 10ch (Prot 110), transmitter
   and receiver roles, at +10 dBm, from EdgeTX, the Controller (1.4), `cfg` and the TX panel. Bench-tested between
   two boards of this kind only, **not yet with Futaba equipment** (`docs/FUTABA.md`). The binding store has 12
@@ -50,7 +53,7 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 To refresh it after a build and a bench test:
 
 ```
-Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.7.hex
+Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.8.hex
 ```
 
 ## Setting a board up with only an SWD programmer
@@ -61,7 +64,7 @@ The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
 
 ## Licence of the hex files
 
-The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.7.hex` also contains Silicon Labs software:
+The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.8.hex` also contains Silicon Labs software:
 the RAIL radio library (Zlib) and parts used under the Silicon Labs Master Software License Agreement
 (https://www.silabs.com/about-us/legal/master-software-license-agreement). Those Silicon Labs parts may be used
 only as part of this firmware on Silicon Labs devices; they may not be extracted, redistributed on their own or

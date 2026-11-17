@@ -21,7 +21,7 @@ extern const RAIL_ChannelConfig_t fasst_channelConfig __attribute__((weak));
 #define FASST_START_SLACK_US 600u        /* a frame that cannot start this far ahead is skipped with its hop */
 #define FASST_MIN_SLACK_US   100u
 #define FASST_LOG_US     5000000u
-#define FASST_TX_POWER_DDBM  100         /* flight: +10 dBm until proven on the bench (deci-dBm) */
+#define FASST_TX_POWER_DDBM  200         /* flight: module maximum (deci-dBm; RAIL caps it, about +19.5 dBm) */
 #define FASST_RANGE_POWER_DDBM (-100)
 #define FASST_TX_FIFO_BYTES  512u
 #define FASST_RX_FIFO_BYTES 1024u         /* a packet is 348 bytes: the module's usual 256-byte RX FIFO is too small */

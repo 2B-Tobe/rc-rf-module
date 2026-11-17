@@ -21,7 +21,7 @@ extern const RAIL_ChannelConfig_t sfhss_channelConfig __attribute__((weak));
 #define SFHSS_MIN_SLACK_US   100u      /* a launch nearer than this goes out at once */
 #define SFHSS_START_SLACK_US 400u      /* a frame that cannot start this far ahead is skipped (the grid and the hop go on) */
 #define SFHSS_LOG_US     5000000u      /* the status line: a line stalls the main loop for about 10 ms */
-#define SFHSS_TX_POWER_DDBM  100       /* flight: +10 dBm until proven on the bench (deci-dBm) */
+#define SFHSS_TX_POWER_DDBM  200       /* flight: module maximum (deci-dBm; RAIL caps it, about +19.5 dBm) */
 #define SFHSS_FS_THROTTLE_US 1000u     /* failsafe sent to the receiver: throttle (channel 3) here, every other channel holds */
 #define SFHSS_RANGE_POWER_DDBM (-100)
 #define SFHSS_TX_FIFO_BYTES   64u
