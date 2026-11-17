@@ -84,7 +84,7 @@ The same commands can be typed in any terminal at 115200 8N1 (end the line with 
 
 | Define | Default | |
 |---|---|---|
-| `DTX_EU_LOCK` | 1 | DSMX 22 ms only, 18 dBm (EU). 0 adds DSMX 11 ms |
+| `DTX_EU_LOCK` | 1 | DSMX 22 ms only. 0 adds DSMX 11 ms |
 | `RL_VB_PACK` | 1 | RLINK receiver battery alarm thresholds: 1 = 4 × AA / 5 V, 2 = 2S LiPo |
 | `LINK_RX_PIN` | — | (Controller, not here) |
 

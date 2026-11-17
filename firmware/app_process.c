@@ -776,7 +776,7 @@ static void bay_telem_fill(sl_rail_handle_t rh, uint32_t now, bay_telem_t *tp)
   memset(&t, 0, sizeof t);
   t.proto = bay_boot.proto;
   t.sub = bay_boot.sub;
-  t.power_dbm = (int8_t)(sl_rail_get_tx_power_dbm(rh) / 10);
+  { int32_t d = sl_rail_get_tx_power_dbm(rh); t.power_dbm = (int8_t)((d >= 0 ? d + 5 : d - 5) / 10); }   // rounded: 19.5 dBm reads 20
   t.rssi_rx = BAY_NO_RSSI;
   t.lq = BAY_NO_LQ;
   t.binding = bay_bind_now;
@@ -796,7 +796,7 @@ static void bay_telem_fill(sl_rail_handle_t rh, uint32_t now, bay_telem_t *tp)
       t.vbat_alarm = (uint8_t)rlink_diag[R_VB_ALM];
       t.vbat_sensor = rlink_diag[R_VBAT] > 0;
       t.vbat_10mv  = (uint16_t)(rlink_diag[R_VBAT] / 10);
-      t.power_dbm  = (int8_t)(rlink_diag[R_PWR] / 10);
+      { int32_t d = rlink_diag[R_PWR]; t.power_dbm = (int8_t)((d >= 0 ? d + 5 : d - 5) / 10); }
       t.lost       = (uint8_t)rlink_diag[R_T_LOST];
       if (fresh) {
         t.rssi_rx = (int8_t)rlink_diag[R_T_RSSIA];  t.rssi_rx_dbm = true;

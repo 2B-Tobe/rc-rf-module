@@ -111,9 +111,9 @@ extern const RAIL_ChannelConfig_t dsm_raw_channelConfig;
 #define DTX_TX_FIFO_BYTES 2048u
 #define DTX_RX_FIFO_BYTES 2048u
 #define DTX_MIN_SLACK_US    150u     /* a launch nearer than this goes out now, counted as late       */
-#define DTX_TX_POWER_DDBM   180      /* deci-dBm, flight at 22 ms: 18 dBm. On air ~13 %:
-                                        63 mW x 13 % = 8.4 % < the EU 10 % limit. 200 = module maximum.   */
-#define DTX_TX_POWER_11MS_DDBM 150   /* flight at 11 ms: 15 dBm. On air ~27 %: 32 mW x 27 % = 8.5 % < 10 % */
+#define DTX_TX_POWER_DDBM   200      /* deci-dBm, flight at 22 ms: module maximum (RAIL caps it, about +19.5 dBm);
+                                        was 18 dBm for the EU duty-cycle sum (on air ~13 %)               */
+#define DTX_TX_POWER_11MS_DDBM 200   /* flight at 11 ms: module maximum (was 15 dBm)                       */
 #define DTX_BIND_POWER_DDBM   0      /* bind burst: 0 dBm, as tested with every receiver              */
 #define DTX_RANGE_POWER_DDBM -100
 #define DTX_PPM_LOSS_US   100000u

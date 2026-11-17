@@ -13,10 +13,10 @@
 | `cfg` name | `sfhss` | `fasst` |
 | For | S-FHSS receivers (Futaba R2006GS / R2008SB and compatible) | FASST receivers (Futaba R6008HS and compatible) |
 | Channels | 8 | ch1–ch8 from the module, ch9 / ch10 at centre |
-| Transmit power | +10 dBm in flight, −10 dBm in range check | +10 dBm in flight, −10 dBm in range check |
+| Transmit power | full power in flight (about +19.5 dBm), −10 dBm in range check | full power in flight (about +19.5 dBm), −10 dBm in range check |
 | Receiver role | yes, for a transmitter of this kind (and possibly a Futaba transmitter: untested) | yes, for a transmitter of this kind only |
 
-The power is held at +10 dBm until the modes have been proven with Futaba receivers.
+Both run at the module's full power, as every other mode (from firmware 1.8; 1.7 held them at +10 dBm).
 
 ## Where they come from
 

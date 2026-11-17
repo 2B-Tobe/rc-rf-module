@@ -10,6 +10,9 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 
 ## Changes
 
+- **1.8 (17 Nov 2026):** full flight power in every mode: S-FHSS and FASST (were +10 dBm) and DSMX (were 18 dBm at
+  22 ms, 15 dBm at 11 ms) now at the module maximum, about +19.5 dBm, as the other modes. The power shown on the TX
+  panel and in EdgeTX is rounded (19.5 reads 20).
 - **1.7 (17 Nov 2026), experimental Futaba modes:** Futaba S-FHSS (Prot 21) and FASST 10ch (Prot 110), transmitter
   and receiver roles, at +10 dBm, from EdgeTX, the Controller (1.4), `cfg` and the TX panel. Bench-tested between
   two boards of this kind only, **not yet with Futaba equipment** (`docs/FUTABA.md`). The binding store has 12
