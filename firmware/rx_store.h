@@ -16,6 +16,7 @@
 #define RX_SLOT_RLINK 5u
 #define RX_SLOT_RLINKTX 6u
 /* slot 7: UK 459 MHz receiver (UR_SLOT, uk459_rx.c): ID in hop[0..1], lane in hop[2] */
+/* slot 8: S-FHSS receiver (RX_SLOT_SFHSS, sfhss.h); slot 9: FASST receiver (RX_SLOT_FASST, fasst.h) */
 
 typedef struct {
   uint32_t magic;

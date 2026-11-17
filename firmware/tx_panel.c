@@ -208,14 +208,14 @@ static const pm_t pm_list[] = {
   {  0, 0, "nRF24",     true  }, {  0, 1, "RLINK",     true  },
   {  0, 2, "UK-459",    false }, {  3, 0, "FrSky D8",  true  }, { 15, 0, "D16v1 EU",  true  },
   { 15, 1, "D16v2 EU",  true  }, { 15, 2, "D16v1 FCC", true  }, { 15, 3, "D16v2 FCC", true  },
-  { 15, 5, "D16 FCC8",  true  }, {  6, 2, "DSMX",      true  },
+  { 15, 5, "D16 FCC8",  true  }, {  6, 2, "DSMX",      true  }, { 21, 0, "S-FHSS",    true  }, { 110, 0, "FASST",    true  },
   {  0, 6, "Jeti cap",  false }, {  0, 7, "TX test",   false },
 };
 #define PM_N ((uint8_t)(sizeof pm_list / sizeof pm_list[0]))
 static int8_t pm_find(uint8_t p, uint8_t s)
 {
   for (uint8_t i = 0; i < PM_N; i++) if (pm_list[i].proto == p && pm_list[i].sub == s) return (int8_t)i;
-  if (p == 3u) for (uint8_t i = 0; i < PM_N; i++) if (pm_list[i].proto == p) return (int8_t)i;   /* any Sub */
+  if (p == 3u || p == 21u) for (uint8_t i = 0; i < PM_N; i++) if (pm_list[i].proto == p) return (int8_t)i;   /* any Sub */
   return -1;
 }
 static void panel_running(uint8_t *p, uint8_t *s, uint8_t *o)   /* what runs now: the radio's choice or the stored setup */

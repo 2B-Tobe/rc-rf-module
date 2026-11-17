@@ -16,7 +16,9 @@ static const etx_proto_t etx_protos[] = {
   {   3u, "FrSkyD",  1u, 1u, 2u, "D8" },
   {   6u, "DSM",     7u, 4u, 7u, "DSM2_1F" "DSM2_2F" "DSMX_1F" "DSMX_2F" },
   {  15u, "FrSkyX",  1u, 3u, 5u, "CH_16" "CH_8\0" "EU_16" },
+  {  21u, "Futaba",  1u, 1u, 5u, "SFHSS" },                                 /* S-FHSS, experimental */
   {  64u, "FrSkyX2", 1u, 3u, 5u, "CH_16" "CH_8\0" "EU_16" },
+  { 110u, "FASST",   1u, 1u, 5u, "10CH\0" },                               /* Futaba FASST 10ch (mpm-v2's number), experimental */
   { ETX_PROTO_MITO, "MiTo", 1u, 3u, 5u, "nRF24" "RLINK" "UK459" },
 };
 #define ETX_NPROTO  ((uint8_t)(sizeof etx_protos / sizeof etx_protos[0]))
@@ -29,7 +31,7 @@ static const etx_proto_t *etx_find(uint8_t num)
 
 /* Single / dual (the 459 MHz link beside 2.4 GHz) from EdgeTX: the module's Opt is 0 = single, 1 = dual.
  *   MiTo:   the Option value as sent (0 single, anything else dual), as for a normal-polarity sender
- *   FrSky:  Option value 1 = dual; any other value single (a model from a 4-in-1 may carry an RF tune there)
+ *   FrSky, Futaba, FASST:  Option value 1 = dual; any other value single (a model from a 4-in-1 may carry an RF tune there)
  *   DSM:    EdgeTX packs its own settings into the option byte; its "Max throw" box (bit 7) = dual */
 void etx_translate(bay_frame_t *f)
 {
@@ -40,6 +42,7 @@ void etx_translate(bay_frame_t *f)
     case 3u:  if (f->wsub == 0u) { p = 3u; s = 0u; } break;                 /* D8 (not Cloned) */
     case 6u:  p = 6u; s = f->wsub;                                         /* the same Sub numbers: 2 / 3 = DSMX 22 / 11 ms */
               dual = ((uint8_t)f->option & 0x80u) ? 1 : 0; break;          /* "Max throw" */
+    case 21u: if (f->wsub <= 2u) { p = 21u; s = 0u; } break;                   /* Futaba S-FHSS; Option value 1 = dual */
     case 15u: if (f->wsub == 0u) { p = 15u; s = 2u; }                      /* CH_16 = ACCST v1 FCC        */
               else if (f->wsub == 1u) { p = 15u; s = 5u; }                 /* CH_8  = v1 FCC, 8 channels  */
               else if (f->wsub == 2u) { p = 15u; s = 0u; }                 /* EU_16 = v1 EU-LBT           */
@@ -47,6 +50,7 @@ void etx_translate(bay_frame_t *f)
     case 64u: if (f->wsub == 0u) { p = 15u; s = 3u; }                      /* FrSkyX2 CH_16 = ACCST v2 FCC */
               else if (f->wsub == 2u) { p = 15u; s = 1u; }                 /* FrSkyX2 EU_16 = v2 EU-LBT    */
               break;
+    case 110u: if (f->wsub == 0u) { p = 110u; s = 0u; } break;                 /* Futaba FASST 10ch; Option value 1 = dual */
     case ETX_PROTO_MITO:
               if (f->wsub <= 2u) { p = 0u; s = f->wsub; keep_opt = true; }  /* nRF24 / RLINK / UK only; Option = dual */
               break;

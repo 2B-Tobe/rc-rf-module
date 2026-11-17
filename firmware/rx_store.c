@@ -8,7 +8,7 @@
 #define RX_STORE_MAGIC  0x52583031u          /* "RX01" */
 
 volatile int32_t rx_store_diag[8];
-#define RX_STORE_SLOTS  8u
+#define RX_STORE_SLOTS  12u         /* 8 until Nov 2026: slots 8.. read as empty on a board written before */
 /* A normal main-flash page well above the ~115 KB application and clear of the
  * top pages (reserved / SE-locked on this part). USERDATA and the top page both
  * report write-OK but silently discard, so we sit at a safe 0x08040000. */
@@ -61,7 +61,7 @@ static bool rx_store_write_all(const rx_record_t *recs)
 bool rx_store_save(uint8_t slot, rx_record_t *r)
 {
   if (slot >= RX_STORE_SLOTS) return false;
-  static rx_record_t all[RX_STORE_SLOTS];        /* static: keeps 640 bytes off the 2 KB stack (main loop only) */
+  static rx_record_t all[RX_STORE_SLOTS];        /* static: 960 bytes would crowd the 2 KB stack (main loop only) */
   for (uint8_t i = 0; i < RX_STORE_SLOTS; i++) if (!rx_store_load(i, &all[i])) memset(&all[i], 0, sizeof(all[i]));
   r->magic = RX_STORE_MAGIC;
   r->crc = rx_store_crc(r);
@@ -75,7 +75,7 @@ bool rx_store_save(uint8_t slot, rx_record_t *r)
 void rx_store_clear(uint8_t slot)
 {
   if (slot >= RX_STORE_SLOTS) return;
-  static rx_record_t all[RX_STORE_SLOTS];        /* static: keeps 640 bytes off the 2 KB stack (main loop only) */
+  static rx_record_t all[RX_STORE_SLOTS];        /* static: 960 bytes would crowd the 2 KB stack (main loop only) */
   for (uint8_t i = 0; i < RX_STORE_SLOTS; i++) if (!rx_store_load(i, &all[i])) memset(&all[i], 0, sizeof(all[i]));
   memset(&all[slot], 0, sizeof(all[slot]));
   (void)rx_store_write_all(all);

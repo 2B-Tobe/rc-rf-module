@@ -146,6 +146,8 @@ the BIND jumper.
 | D16v2 FCC | FrSky ACCST D16 v2 FCC | yes | 15 / 3 |
 | D16 FCC8 | FrSky ACCST D16 v1 FCC, channels 1–8 only | yes | 15 / 5 |
 | DSMX | yes (22 ms) | yes | 6 / 2 |
+| S-FHSS | Futaba S-FHSS, **experimental** | yes, experimental | 21 / 0 |
+| FASST | Futaba FASST 10ch, **experimental** | for a transmitter board of this kind, experimental | 110 / 0 |
 | Jeti cap | capture tool | capture tool | 0 / 6 |
 | TX test | carrier test | — | 0 / 7 |
 | DSM cap | — | capture tool | 0 / 4 |
