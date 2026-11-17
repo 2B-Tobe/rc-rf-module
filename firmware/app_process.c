@@ -217,6 +217,22 @@ static bool          bay_range_now   = false;   // RANGE on in the frames
 static bay_frame_t   bay_boot;                  // the frame the role was chosen from
 #include "cfg.c"       // the "cfg" command and the stored setup (flash page 0x08042000)
 #include "rx_setup.c"  // receiver setup over the air (RxSetup): setup packets on RLINK's PHY
+
+// TX panel (tx_panel.c, #included just before app_process_action): own display, three buttons, red / green LED
+#include "panel_config.h"   // TX panel build options: input (MULTI / PPM / MULTI + PPM) and 3 or 4 buttons
+#if PANEL_INPUT != PANEL_IN_MULTI && PANEL_INPUT != PANEL_IN_PPM && PANEL_INPUT != PANEL_IN_MULTI_PPM
+#error "panel_config.h: PANEL_INPUT must be PANEL_IN_MULTI, PANEL_IN_PPM or PANEL_IN_MULTI_PPM"
+#endif
+#if PANEL_BUTTONS != 3 && PANEL_BUTTONS != 4
+#error "panel_config.h: PANEL_BUTTONS must be 3 or 4"
+#endif
+#define PANEL_PPM_ONLY   (PANEL_INPUT == PANEL_IN_PPM)
+#define PANEL_MULTI_ONLY (PANEL_INPUT == PANEL_IN_MULTI)
+static bool panel_on = false;                   // a display answered at power-up: transmitter only, set up from its buttons
+static bool panel_start(sl_rail_handle_t rh);
+static bool panel_bind_pin(void);
+static bool panel_range_on(void);
+static void panel_service(uint32_t now);
 static bool          bay_rxsetup_now = false;   // RxSetup on in the frames (byte 26 bit 3)
 static uint8_t       bay_rxs_layout  = 0;       // ... with this receiver output layout (byte 26 bits 0..1)
 static bool          bay_rxs_role    = false;   // started for RxSetup: the RLINK TX role sends setup packets for the encoder's Prot / Sub
@@ -497,7 +513,7 @@ static bool pin_low(const sl_gpio_t *p)
 static uint32_t cfg_bind_until = 0;             // "cfg bind": BIND counts as held until this RAIL time (0 = no)
 static bool bind_held(void)                     // the BIND jumper, or the virtual one after "cfg bind"
 {
-  if (pin_low(&bind_pin)) return true;
+  if (panel_on ? panel_bind_pin() : pin_low(&bind_pin)) return true;   // TX panel: BIND only from the press held at power-up
   if (cfg_bind_until != 0u) {
     uint32_t now = (uint32_t)sl_rail_get_time(sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0));
     if ((int32_t)(now - cfg_bind_until) < 0) return true;
@@ -554,7 +570,7 @@ static void rx_outputs_service(uint32_t now)    // main loop, receiver roles: co
   app_log("RXOUT bind plug out: servo connector 8 is servo 8 again\r\n");
 #endif
 }
-static bool range_in(void) { return bay_mode ? bay_range_now : pin_low(&range_pin); }   // encoder mode: the pin is the mode jumper
+static bool range_in(void) { return (bay_mode ? bay_range_now : pin_low(&range_pin)) || panel_range_on(); }   // encoder mode: the pin is the mode jumper; TX panel: + its menu
 
 // ------------------------------------------------------- encoder serial (bay) --
 #define BAY_WAIT_LOG_MS  3000u    // encoder mode, no frames yet: a reminder in the log this often
@@ -1015,13 +1031,28 @@ static void proto_start(void)
   sl_gpio_set_pin_mode(&proto0_pin, SL_GPIO_MODE_INPUT_PULL, 1);
   sl_gpio_set_pin_mode(&proto1_pin, SL_GPIO_MODE_INPUT_PULL, 1);
   sl_gpio_set_pin_mode(&proto2_pin, SL_GPIO_MODE_INPUT_PULL, 1);
+  bool panel = panel_start(rh);                     // TX panel (tx_panel.c): a display on PA08 / PA09 = transmitter only
   // Who decides the role and the protocol (cfg.h):
   //   nothing stored: the jumpers, exactly as before (F/S = receiver, RANGE at power-up = encoder serial, PC00..PC02 = protocol)
   //   TX stored:      F/S low = encoder serial control; F/S high = whichever input comes first: the encoder's MULTI
   //                   frames (encoder control) or PPM (the stored protocol and Opt) - no jumper needed for either
   //   RX stored:      F/S low = the protocol jumpers, as before; F/S high = the stored protocol
-  bool fs = pin_low(&fs_pin);
+  bool fs = panel ? false : pin_low(&fs_pin);       // TX panel: F/S ignored
   cfg_used = cfg_load(&cfg_boot);
+  if (panel && (!cfg_used || cfg_boot.role != CFG_ROLE_TX)) {   // TX panel: always a stored TX setup (MULTI frames or PPM)
+    cfg_t c; proto_t pm;
+    memset(&c, 0, sizeof c);
+    c.role = CFG_ROLE_TX;
+    if (cfg_used && cfg_map(cfg_boot.proto, cfg_boot.sub, false, &pm)) { c.proto = cfg_boot.proto; c.sub = cfg_boot.sub; }
+    else { c.proto = 0u; c.sub = 1u; }               // nothing stored (or a receiver-only mode): RLINK
+    bool was = cfg_used;
+    bool ok = cfg_save(&c);
+    cfg_used = cfg_load(&cfg_boot);
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log("PANEL %s: TX Prot %u Sub %u stored%s\r\n", was ? "receiver setup made a transmitter" : "nothing stored",
+            (unsigned)c.proto, (unsigned)c.sub, ok ? "" : " - FAILED");
+#endif
+  }
   if (cfg_bind_pending()) {                         // "cfg bind": this power-up binds as if the BIND jumper were fitted
     cfg_bind_consume();
     cfg_bind_until = ((uint32_t)sl_rail_get_time(rh) + 8000000u) | 1u;
@@ -1030,7 +1061,7 @@ static void proto_start(void)
 #endif
   }
   is_rx = cfg_used ? (cfg_boot.role == CFG_ROLE_RX) : fs;
-  bool plug = rxp_read(rh);                         // bind plug on servo connector 8 (PB05, unconnected in the module bay)
+  bool plug = panel ? false : rxp_read(rh);                         // bind plug on servo connector 8 (PB05, unconnected in the module bay)
   if (plug && !is_rx) {                             // a new board, or one set up as a transmitter: the plug makes it a receiver
     cfg_used = true;                                // for this power-up only (nothing is stored): RLINK receiver, binding and
     memset(&cfg_boot, 0, sizeof cfg_boot);          // listening for setup packets, so a TX module can pair with it and set it up
@@ -1103,8 +1134,17 @@ static void proto_start(void)
   // Encoder serial control: a transmitter (F/S open) with the RANGE jumper fitted at power-up - or a stored TX setup
   // with F/S low. It overrides every other jumper. A stored TX setup with F/S open (no jumpers) listens for both:
   // MULTI frames -> encoder control, PPM -> the stored protocol. Any other setting: exactly as before, no serial.
-  bool bay_auto = cfg_used && !is_rx && !fs;
+  bool bay_auto = cfg_used && !is_rx && !fs && !(panel && PANEL_MULTI_ONLY);   // TX panel, MULTI only: no PPM
   bay_listen = cfg_used ? (!is_rx) : (!fs && pin_low(&range_pin));
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+  if (panel && PANEL_MULTI_ONLY) app_log("PANEL input MULTI only: waiting for MULTI frames on J3 RX (PA06); PPM not used\r\n");
+#endif
+  if (panel && cfg_used && !is_rx && (PANEL_PPM_ONLY || (PANEL_INPUT == PANEL_IN_MULTI_PPM && cfg_boot.outputs == CFG_TXIN_PPM))) {   // TX panel, PPM only: PB01, no MULTI
+    bay_listen = false;
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log("PANEL input PPM only: the stored protocol on PPM (PB01); J3 RX not listened to for MULTI\r\n");
+#endif
+  }
   if (bay_listen) {
     bay_init(rh, bay_on_frame);
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -1244,6 +1284,8 @@ static void proto_start(void)
 #endif
 }
 
+#include "tx_panel.c"   // TX panel: display, buttons and LED (uses the role statics above)
+
 // ------------------------------------------------------------- main action --
 void app_process_action(void)
 {
@@ -1275,6 +1317,7 @@ void app_process_action(void)
 
   if (!proto_started) { proto_start(); return; }
   if (bay_listen) bay_service(rh);   // encoder MULTI frames: BIND / RANGE, restarts, status line
+  if (panel_on) panel_service((uint32_t)sl_rail_get_time(rh));   // TX panel: display, buttons, LED (a slice of display data per pass)
   if (bay_unsupported) {             // the encoder asked for a Prot / Sub this module does not have: RF off
     static uint32_t tb = 0;
     static bool     ph = false;

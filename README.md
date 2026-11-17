@@ -9,6 +9,7 @@ on 459 MHz beside the 2.4 GHz link. One firmware serves both roles and both boar
 | **Transmitter module** | takes the channels from a transmitter's encoder — PPM, or Multiprotocol serial frames — and sends them on nRF24, RLINK, FrSky D8, FrSky D16 (ACCST v1/v2, EU-LBT or FCC) or DSMX, with the 459 MHz link beside it when the RA-01 is fitted |
 | **Receiver** | 8 servo outputs, PPM and SBUS; with the RA-01 fitted it listens on both bands and takes the servos from 459 MHz when 2.4 GHz goes quiet |
 | **Setup** | protocol jumpers, or a setup stored in the module: written over its serial pins with the hand-held **Controller** (this repository) or a terminal |
+| **TX panel (add-on)** | a small display, three or four buttons and a red / green LED on pins the board already has: mode, Single / Dual, input, bind and range check set on the module itself (`docs/TX_PANEL.md`) |
 | **Links of its own** | RLINK (two-way 2.4 GHz with telemetry, adaptive channels and power, alarms), nRF24 (the original 11 ms link), UK 459 MHz (10-byte hopping link) |
 
 ## Two board variants, one firmware
@@ -28,7 +29,7 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 | `controller/` | the RF Module Controller: an STM32F103C8 box with a 128×64 display that sets the module up over its serial pins — STM32CubeIDE project, manual |
 | `hardware/rf_module/` | the module carrier board: KiCad project, Gerbers, BOM and placement files |
 | `hardware/controller/` | the controller board: KiCad project, Gerbers, BOM and placement files |
-| `docs/` | operating quick sheet, flashing with an ST-Link, the serial input and setup command reference, the RLINK description |
+| `docs/` | operating quick sheet, flashing with an ST-Link, the serial input and setup command reference, the RLINK description, the TX panel |
 | `CREDITS.md` | people, projects and components this builds on, with their licences |
 
 ## Start here
@@ -40,6 +41,8 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 4. **Feed it** — `docs/SERIAL_INPUT.md`: what a transmitter has to send (PPM or the Multiprotocol serial frame),
    and the text commands any programmer can use to set the module up.
 5. **Controller** — `controller/README.md` and `controller/docs/MANUAL.md` to build and use the setup box.
+6. **TX panel** — `docs/TX_PANEL.md`: the display, buttons and LED add-on for a transmitter module, its wiring and
+   the three build versions (MULTI + PPM, MULTI only, PPM only).
 
 ## Regulatory note
 

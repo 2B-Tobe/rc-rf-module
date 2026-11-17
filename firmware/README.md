@@ -20,6 +20,7 @@ Studio project is `rc_module_trx.slcp` (the project keeps its development name; 
 | `dsm_tx.c/.h`, `dsm_rx.c/.h`, `dsm_cap.c/.h` | DSMX transmitter, receiver and the raw-capture tool |
 | `uk459_tx.c/.h`, `uk459_rx.c/.h` | the 459 MHz link on the SX1278, both directions |
 | `jeti_cap.c/.h`, `tx_test.c` | 802.15.4 capture tool, carrier test |
+| `tx_panel.c`, `panel_config.h`, `panel_font.h`, `panel_font14.h` | the TX panel add-on (`docs/TX_PANEL.md`): display, buttons, LED; build options in `panel_config.h` |
 | `servo_out.c/.h`, `servo_pins.h`, `sbus_out.c/.h` | receiver outputs: 8 servos + PPM on timer compare outputs, SBUS on EUSART1 |
 | `rx_store.c/.h` | binds and failsafe presets in flash page 0x08040000 (8 slots); the setup is in page 0x08042000. Both survive a firmware update |
 | `config/`, `autogen/` | SDK configuration and generated files (radio configuration in `config/rail/`) |

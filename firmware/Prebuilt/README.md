@@ -9,6 +9,9 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 
 ## Changes
 
+- **1.6 (17 Nov 2026), source only for now:** the TX panel (`docs/TX_PANEL.md`): a display, three or four buttons
+  and a red / green LED wired to pins the board already has. A board without the display runs as 1.5. The hex
+  follows here once this build has been bench-tested; until then build it from the sources (`firmware/README.md`).
 - **1.5 (15 Nov 2026):** a stored transmitter setup also takes PPM on J3 RX (PA06), the pin a radio's bay pin 1
   is wired to, so a radio with External RF set to PPM works on the same wiring as MULTI; the module uses
   whichever brings three frames first. On the Taranis Q X7 the PPM frames were read from the bay and MULTI

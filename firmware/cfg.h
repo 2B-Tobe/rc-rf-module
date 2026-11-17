@@ -40,8 +40,11 @@ typedef struct {
   uint8_t proto;     /* Prot */
   uint8_t sub;       /* Sub */
   uint8_t option;    /* transmitter with PPM input: 0 = single (2.4 GHz only), 1 = dual (459 MHz beside) */
-  uint8_t outputs;   /* receiver: output layout, servo_out.h RXOUT_* (0 = 8 PWM, as before) */
+  uint8_t outputs;   /* receiver: output layout, servo_out.h RXOUT_* (0 = 8 PWM, as before); TX panel: the input, CFG_TXIN_* */
 } cfg_t;
+
+#define CFG_TXIN_AUTO 0u   /* TX: MULTI frames or PPM, whichever comes first (every stored TX setup so far)           */
+#define CFG_TXIN_PPM  1u   /* TX panel: PPM on PB01 only, no MULTI on J3 RX                                          */
 
 bool cfg_load(cfg_t *c);                      /* true = a valid setup is stored */
 bool cfg_save(const cfg_t *c);

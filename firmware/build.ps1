@@ -1,6 +1,7 @@
 # build.ps1 - builds rc_module_trx from a PowerShell prompt (Windows).
 #
 #   .\build.ps1        run it in the project folder, or give its full path
+#                      TX panel options (input, 3 or 4 buttons): panel_config.h, set before building
 #
 # What it does:
 #   1. Marks app_process.c as changed. The protocol files (rlink.c, nrf24_rx.c,
@@ -23,6 +24,9 @@
 
 $ErrorActionPreference = 'Stop'
 $proj  = $PSScriptRoot
+
+# the TX panel options in panel_config.h, shown so the build says what it is
+Get-Content (Join-Path $proj 'panel_config.h') | Where-Object { $_ -match '^#define PANEL_(INPUT|BUTTONS) ' } | ForEach-Object { Write-Host ('Panel: ' + $_.Trim()) }
 $conan = Join-Path $env:USERPROFILE '.silabs\slt\installs\conan\p'
 
 if (-not (Test-Path (Join-Path $proj 'cmake_gcc\CMakePresets.json'))) {
