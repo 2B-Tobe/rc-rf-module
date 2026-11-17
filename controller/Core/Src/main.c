@@ -27,7 +27,7 @@
 #include "link.h"
 #include <string.h>
 
-#define VERSION "1.4"
+#define VERSION "1.5"
 
 /* ------------------------------------------------------------------ the module's modes, in Prot / Sub numbering */
 typedef struct {

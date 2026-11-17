@@ -39,6 +39,8 @@ ST device files (Apache-2.0) keep their own licences, kept next to them.
 
 ## Versions
 
+- 1.5 — the display's direction is sent again before every picture, so a start-up that came up mirrored
+  heals at once; the display gets 100 ms to settle before it is set up.
 - 1.4 — Futaba S-FHSS and FASST 10ch in the Proto list, both **experimental** (module firmware 1.7 or later;
   see `docs/FUTABA.md`: bench-tested between two boards of this kind, not yet with Futaba equipment).
 - 1.3 — a receiver's output layout: row 4 reads **Out** for a receiver (8 PWM / 5+SBUS / 5+PPM / 5+S+P:

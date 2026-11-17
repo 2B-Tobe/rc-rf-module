@@ -42,12 +42,27 @@ static uint8_t com_spi2(u8g_t *u, uint8_t msg, uint8_t arg_val, void *arg_ptr)
 
 void display_init(void)
 {
+  board_delay_ms(100);                                             /* the display's supply settles before it is set up */
   u8g_InitComFn(&u8g, &u8g_dev_uc1701_mini12864_2x_hw_spi, com_spi2);
   u8g_SetFont(&u8g, u8g_font_7x14);
   u8g_SetContrast(&u8g, 180);
 }
 
-void display_begin(void) { u8g_FirstPage(&u8g); }
+/* The picture's direction, sent again before every picture: with no chip-select line a stray clock edge at
+   power-up can shift the bytes of the start-up sequence, and a lost ADC / COM command leaves the picture mirrored
+   until the next power-up. Sent each time, a bad start-up heals at the first picture. */
+static void display_orient(void)
+{
+  static const uint8_t cmd[] = { 0x40u,       /* display start line 0                    */
+                                 0xA0u,       /* ADC (column order) normal                */
+                                 0xC8u,       /* COM (row order) reversed: the panel's way */
+                                 0xA6u,       /* not inverted                             */
+                                 0xA4u };     /* RAM shown (not all pixels on)            */
+  board_disp_cd(false);
+  for (unsigned i = 0; i < sizeof cmd; i++) board_spi_write(cmd[i]);
+}
+
+void display_begin(void) { display_orient(); u8g_FirstPage(&u8g); }
 bool display_end(void)   { return u8g_NextPage(&u8g) != 0u; }
 
 static u8g_uint_t col_x(uint8_t col) { return (u8g_uint_t)(col * 7u); }
