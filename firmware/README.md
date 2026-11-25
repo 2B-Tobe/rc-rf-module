@@ -19,10 +19,12 @@ Studio project is `rc_module_trx.slcp` (the project keeps its development name; 
 | `frsky_d8.c/.h`, `frsky_d16.c/.h` | FrSky D8 and D16 (ACCST v1/v2, EU-LBT and FCC), transmitter and receiver |
 | `dsm_tx.c/.h`, `dsm_rx.c/.h`, `dsm_cap.c/.h` | DSMX transmitter, receiver and the raw-capture tool |
 | `uk459_tx.c/.h`, `uk459_rx.c/.h` | the 459 MHz link on the SX1278, both directions |
+| `fasst.c/.h`, `sfhss.c/.h` | Futaba FASST and S-FHSS, experimental (`docs/FUTABA.md`) |
+| `jeti.c/.h` | Jeti Duplex 2.4 transmitter and receiver, experimental (`docs/JETI.md`) |
 | `jeti_cap.c/.h`, `tx_test.c` | 802.15.4 capture tool, carrier test |
 | `tx_panel.c`, `panel_config.h`, `panel_font.h`, `panel_font14.h` | the TX panel add-on (`docs/TX_PANEL.md`): display, buttons, LED; build options in `panel_config.h` |
 | `servo_out.c/.h`, `servo_pins.h`, `sbus_out.c/.h` | receiver outputs: 8 servos + PPM on timer compare outputs, SBUS on EUSART1 |
-| `rx_store.c/.h` | binds and failsafe presets in flash page 0x08040000 (12 slots); the setup is in page 0x08042000. Both survive a firmware update |
+| `rx_store.c/.h` | binds and failsafe presets in flash page 0x08100000 (12 slots); the setup is in page 0x08102000. Both survive a firmware update from 1.9 on (up to 1.8 they sat at 0x08040000 / 0x08042000, which the firmware has outgrown: after updating from 1.8 or earlier, set the module up and bind again) |
 | `config/`, `autogen/` | SDK configuration and generated files (radio configuration in `config/rail/`) |
 | `cmake_gcc/` | the CMake build (`build/` is generated and not committed) |
 | `simplicity_sdk_2026.6.1/` | the SDK subset the project uses, without the RAIL library and the iostream printf files (they come with the SDK; see below) |

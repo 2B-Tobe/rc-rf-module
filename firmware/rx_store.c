@@ -9,10 +9,14 @@
 
 volatile int32_t rx_store_diag[8];
 #define RX_STORE_SLOTS  12u         /* 8 until Nov 2026: slots 8.. read as empty on a board written before */
-/* A normal main-flash page well above the ~115 KB application and clear of the
- * top pages (reserved / SE-locked on this part). USERDATA and the top page both
- * report write-OK but silently discard, so we sit at a safe 0x08040000. */
-#define RX_STORE_BASE   ((uint32_t *)(FLASH_BASE + 0x40000u))
+/* A normal main-flash page well above the application and clear of the top pages (reserved / SE-locked on this
+ * part; USERDATA and the top page both report write-OK but silently discard).
+ * 0x08100000 since firmware 1.9. Until then the store sat at 0x08040000, chosen when the application was ~115 KB;
+ * the application grew to within 2 KB of it, and with jeti.c past it: storing a bind or a setup then erased a page
+ * of the firmware itself and the module did not start again. The linker file now refuses a build that reaches
+ * 0x08100000 (autogen/linkerfile.ld: STORE_FLASH_BEGIN). Binds and setups stored by firmware up to 1.8 are not
+ * carried over: set the module up and bind again after updating. */
+#define RX_STORE_BASE   ((uint32_t *)(FLASH_BASE + 0x100000u))
 #define RX_STORE_STRIDE ((sizeof(rx_record_t) + 3u) & ~3u)
 
 static uint16_t rx_store_crc(const rx_record_t *r)

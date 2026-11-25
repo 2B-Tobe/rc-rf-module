@@ -311,6 +311,11 @@ heap_size = heap_limit - __HeapBase;
   linker_storage_begin = linker_storage_end - SIZEOF(.internal_storage);
   ASSERT((linker_storage_begin >= (__etext + SIZEOF(.data))), "FLASH memory overflowed !")
 
+  /* rc_module_trx: the bind store (rx_store.c, 0x08100000) and the stored setup (cfg.c, 0x08102000) are flash pages
+   * the firmware erases and writes itself. The firmware image must end below them. */
+  STORE_FLASH_BEGIN = 0x08100000;
+  ASSERT(((__etext + SIZEOF(.data)) <= STORE_FLASH_BEGIN), "The firmware reaches the bind / setup store pages at 0x08100000: move RX_STORE_BASE (rx_store.c) and CFG_BASE (cfg.c) up, and STORE_FLASH_BEGIN with them")
+
 
   HIDDEN(app_flash_end = 0x8000000 + 0x17e000);
   ASSERT( (linker_nvm_begin + SIZEOF(.nvm)) <= app_flash_end, "NVM3 is excessing the flash size !")

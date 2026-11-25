@@ -105,6 +105,7 @@ static volatile bool fs_cmd_log = false;
 #include "frsky_d8.c"
 #include "frsky_d16.c"
 #include "rlink.c"
+#include "jeti.c"       // quasi Jeti Duplex transmitter / receiver (protocol 111, as mpm-v2), experimental; after rlink.c: its battery reading
 
 // ---------------------------------------------------------------- protocol --
 #define PAYLOAD_MAX        9u
@@ -196,7 +197,7 @@ static sl_gpio_t proto1_pin = { .port = SL_GPIO_PORT_C, .pin = 1 }; // PROTOCOL_
 static sl_gpio_t proto2_pin = { .port = SL_GPIO_PORT_C, .pin = 2 }; // PROTOCOL_02, act.low
 // Protocol select at boot: all floating -> nRF24 (+ F/S low = nRF24 receiver); PC02 low -> RLINK (PC01 ignored);
 // PC00 low -> FrSky D8; PC01 low -> FrSky D16 (v1 EU-LBT)
-typedef enum { PROTO_NRF24 = 0, PROTO_D8, PROTO_D16, PROTO_RLINK, PROTO_DSMCAP, PROTO_DSMRX, PROTO_DSMTX, PROTO_TXTEST, PROTO_JETICAP, PROTO_UKONLY, PROTO_UKRX, PROTO_SFHSS, PROTO_FASST } proto_t;
+typedef enum { PROTO_NRF24 = 0, PROTO_D8, PROTO_D16, PROTO_RLINK, PROTO_DSMCAP, PROTO_DSMRX, PROTO_DSMTX, PROTO_TXTEST, PROTO_JETICAP, PROTO_UKONLY, PROTO_UKRX, PROTO_SFHSS, PROTO_FASST, PROTO_JETI } proto_t;
 static proto_t proto = PROTO_NRF24;
 static bool    nrf_rx_role = false;      // nRF24 + F/S low at boot: receiver role (nrf24_rx.c)
 static bool    uk_have_sx  = false;      // DUAL: an SX1278 answered at power-up
@@ -217,7 +218,7 @@ static bool          bay_unsupported = false;   // ... but asked for a Prot / Su
 static bool          bay_bind_now    = false;   // BIND on in the frames
 static bool          bay_range_now   = false;   // RANGE on in the frames
 static bay_frame_t   bay_boot;                  // the frame the role was chosen from
-#include "cfg.c"       // the "cfg" command and the stored setup (flash page 0x08042000)
+#include "cfg.c"       // the "cfg" command and the stored setup (flash page 0x08102000)
 #include "rx_setup.c"  // receiver setup over the air (RxSetup): setup packets on RLINK's PHY
 
 // TX panel (tx_panel.c, #included just before app_process_action): own display, three buttons, red / green LED
@@ -603,6 +604,8 @@ static bool cfg_map(uint8_t prot, uint8_t sub, bool rx, proto_t *p)
               return false;
     case 110u: if (sub == 0u) { *p = PROTO_FASST; return true; }                  // Futaba FASST 10ch (mpm-v2's number; not in Multiprotocol); receiver: for a board of this kind
               return false;
+    case 111u: if (sub == 0u) { *p = PROTO_JETI; return true; }                   // quasi Jeti Duplex (mpm-v2's number), transmitter and receiver (jeti.c), experimental
+              return false;
     default:  return false;
   }
 }
@@ -625,6 +628,7 @@ static const char *bay_role_name(const bay_frame_t *f)
     case PROTO_DSMTX:  return (f->sub == 3u) ? "DSMX 11 ms" : "DSMX 22 ms";
     case PROTO_SFHSS:  return "Futaba S-FHSS";
     case PROTO_FASST:  return "Futaba FASST 10ch";
+    case PROTO_JETI:   return "Jeti Duplex (quasi)";
     default:           return "?";
   }
 }
@@ -825,6 +829,18 @@ static void bay_telem_fill(sl_rail_handle_t rh, uint32_t now, bay_telem_t *tp)
       } else t.link_alarm = 2;
       break;
     }
+    case PROTO_JETI: {                                          /* the receiver's replies: voltage, its signal figure, RSSI here, frames answered */
+      jeti_telem_t j;
+      jeti_telem(now, &j);
+      t.link = j.link; t.bound = j.bound; t.binding = bay_bind_now || j.binding;
+      if (j.link) {
+        t.rssi_rx = (int8_t)(j.signal > 127u ? 127 : j.signal);
+        t.rssi_tx = j.rssi_tx; t.rssi_tx_valid = true;
+        t.lq = j.lq;
+        if (j.vbat_10mv) { t.vbat_sensor = true; t.vbat_10mv = j.vbat_10mv; }
+      } else t.link_alarm = 2;
+      break;
+    }
     default:                                                    /* nRF24, DSMX, UK only, the tools: no telemetry back */
       break;
   }
@@ -935,6 +951,7 @@ static const char *proto_name(proto_t p, bool rx)
     case PROTO_UKRX:    return "UK 459 MHz receiver";
     case PROTO_SFHSS:   return rx ? "Futaba S-FHSS receiver" : "Futaba S-FHSS";
     case PROTO_FASST:   return rx ? "FASST receiver (MiTo boards)" : "Futaba FASST 10ch";
+    case PROTO_JETI:    return rx ? "Jeti Duplex receiver (quasi)" : "Jeti Duplex (quasi)";
     default:            return "?";
   }
 }
@@ -1140,6 +1157,9 @@ static void proto_start(void)
     if (bay_unsupported) app_log("SETUP Prot %u Sub %u is not a %s mode of this module: RF off, both LEDs blink. Store another with cfg\r\n",
                                  cfg_boot.proto, cfg_boot.sub, is_rx ? "receiver" : "transmitter");
   } else app_log("SETUP none stored: the jumpers decide ('cfg' on this line stores one)\r\n");
+  { extern uint32_t __etext, __data_start__, __data_end__;   // linker symbols: where the firmware image ends in flash
+    app_log("FLASH firmware ends at 0x%08lX; bind store 0x08100000, setup store 0x08102000 (above the firmware)\r\n",
+            (unsigned long)((uint32_t)&__etext + ((uint32_t)&__data_end__ - (uint32_t)&__data_start__))); }
 #endif
   // Encoder serial control: a transmitter (F/S open) with the RANGE jumper fitted at power-up - or a stored TX setup
   // with F/S low. It overrides every other jumper. A stored TX setup with F/S open (no jumpers) listens for both:
@@ -1259,7 +1279,7 @@ static void proto_start(void)
 #endif
   uk_have_sx = uk_probe(rh);
   if (uk_have_sx) {
-    bool rx_role = is_rx && (nrf_rx_role || proto == PROTO_D8 || proto == PROTO_D16 || proto == PROTO_DSMRX || proto == PROTO_RLINK || proto == PROTO_SFHSS || proto == PROTO_FASST);
+    bool rx_role = is_rx && (nrf_rx_role || proto == PROTO_D8 || proto == PROTO_D16 || proto == PROTO_DSMRX || proto == PROTO_RLINK || proto == PROTO_SFHSS || proto == PROTO_FASST || proto == PROTO_JETI);
     if (proto == PROTO_UKRX) { /* the receiver role takes the SX1278 itself (uk_rx_start in the main loop) */ }
     else if (rx_role && !bay_unsupported) {                  // DUAL receiver: the 459 MHz receiver runs beside the 2.4 GHz one
       uk_dual_rx = true;
@@ -1352,7 +1372,8 @@ void app_process_action(void)
            : proto == PROTO_DSMRX ? dsm_rx_fresh(now, DUAL_RX_SWITCH_US)
            : proto == PROTO_RLINK ? rlink_rx_fresh(now, DUAL_RX_SWITCH_US)
            : proto == PROTO_SFHSS ? sfhss_rx_fresh(now, DUAL_RX_SWITCH_US)
-           : proto == PROTO_FASST ? fasst_rx_fresh(now, DUAL_RX_SWITCH_US) : true;
+           : proto == PROTO_FASST ? fasst_rx_fresh(now, DUAL_RX_SWITCH_US)
+           : proto == PROTO_JETI  ? jeti_rx_fresh(now, DUAL_RX_SWITCH_US) : true;
     bool u = uk_rx_fresh(now, DUAL_RX_UK_HOLD_US);
     bool want = !p && u;
     if (want != servo_out_overridden()) {
@@ -1472,6 +1493,19 @@ void app_process_action(void)
       fasst_input((int32_t)(now - last) <= 100000); }
     fasst_range(range_in());
     fasst_action();
+    return;
+  }
+  if (proto == PROTO_JETI) {    // quasi Jeti Duplex transmitter or receiver (serial frames or a stored setup: Prot 111), experimental
+    static bool jq_started_once = false;
+    if (!jq_started_once) { jq_started_once = true; (void)jeti_start(rh, contrl_pos, range_in(), is_rx && !bay_mode, bind_held()); }
+    if (rx_held) { rx_held = false; jeti_rx_process(); }
+    if (is_rx && !bay_mode) { jeti_rx_service(bind_held()); return; }
+    { uint32_t last = ppm_last_sync;
+      uint32_t now  = (uint32_t)sl_rail_get_time(rh);
+      jeti_input((int32_t)(now - last) <= 100000); }
+    jeti_range(range_in());
+    jeti_bind(bind_in());
+    jeti_action();
     return;
   }
   if (proto == PROTO_DSMRX) {   // DSMX receiver (PC00 + PC01 + F/S): PPM, servos out
@@ -1666,6 +1700,7 @@ SL_CODE_RAM void sl_rail_util_on_event(sl_rail_handle_t rh, sl_rail_events_t eve
   if (proto == PROTO_DSMTX) dsm_tx_on_events(events);
   if (proto == PROTO_SFHSS) sfhss_on_events(events);     // packet B is launched from here
   if (proto == PROTO_FASST) fasst_on_events(events);     // the next packet is launched from here
+  if (proto == PROTO_JETI) jeti_on_events(events);       // counters; the frames run from the RAIL timer
   if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
     (void)sl_rail_hold_rx_packet(rh);   // keep it in the FIFO for the main loop
     rx_held = true;

@@ -8,10 +8,11 @@
 #include <stdio.h>
 #include <string.h>
 
-/* The page after the bind store (rx_store.c: 0x08040000, 8 KB pages). Main flash, far above the firmware. */
-#define CFG_BASE   ((uint32_t *)(FLASH_BASE + 0x42000u))
+/* The page after the bind store (rx_store.c: 0x08100000, 8 KB pages). Main flash, above the firmware: the linker
+ * file refuses a build that reaches 0x08100000 (see rx_store.c for why the two pages moved in firmware 1.9). */
+#define CFG_BASE   ((uint32_t *)(FLASH_BASE + 0x102000u))
 #define CFG_MAGIC  0x31474643u                                      /* "CFG1" */
-#define CFG_BIND_WORD ((uint32_t *)(FLASH_BASE + 0x42000u + 16u))   /* one-shot: "cfg bind" writes it, the next boot takes it */
+#define CFG_BIND_WORD ((uint32_t *)(FLASH_BASE + 0x102000u + 16u))   /* one-shot: "cfg bind" writes it, the next boot takes it */
 #define CFG_BIND_MAGIC 0x444E4942u                                  /* "BIND" */
 
 typedef struct {
@@ -22,7 +23,7 @@ typedef struct {
 
 /* v1.1: the receiver's owners (rx_setup.c: the TX modules allowed to set it up over the air), at +64 in the
    same page. cfg_save keeps them; cfg clear erases them with everything else. */
-#define CFG_OWN_BASE  ((uint32_t *)(FLASH_BASE + 0x42000u + 64u))
+#define CFG_OWN_BASE  ((uint32_t *)(FLASH_BASE + 0x102000u + 64u))
 #define CFG_OWN_MAGIC 0x314E574Fu                                   /* "OWN1" */
 #define CFG_OWNERS    3u
 typedef struct {
@@ -149,6 +150,7 @@ static const cfg_mode_t cfg_modes[] = {
   { "d8",     3u, 0u, "FrSky D8",                "FrSky D8 receiver" },
   { "sfhss",  21u, 0u, "Futaba S-FHSS (experimental)", "Futaba S-FHSS receiver (experimental)" },
   { "fasst", 110u, 0u, "Futaba FASST 10ch (experimental)", "FASST receiver (MiTo boards, experimental)" },
+  { "duplex", 111u, 0u, "Jeti Duplex, quasi (experimental)", "Jeti Duplex receiver, quasi (experimental)" },
   { "d16",   15u, 0u, "FrSky D16",               "FrSky D16 receiver" },
   { "dsmx",   6u, 2u, "DSMX 22 ms",              "DSMX receiver" },
 #if !DTX_EU_LOCK
@@ -237,7 +239,7 @@ static void cfg_cli(sl_cli_command_arg_t *a)
   bool tx = cfg_eq(w, "tx"), rx = cfg_eq(w, "rx");
   if ((!tx && !rx) || n < 2) {
     printf("CFG usage: cfg | cfg tx <proto> [dual] | cfg rx <proto> [8pwm|5sbus|5ppm|5both] | cfg bind | cfg clear\r\n"
-           "    proto: nrf24 rlink uk d8 d16 dsmx sfhss fasst jeti txtest(tx) dsmcap(rx), or the serial frame numbers: Prot Sub\r\n");
+           "    proto: nrf24 rlink uk d8 d16 dsmx sfhss fasst duplex jeti txtest(tx) dsmcap(rx), or the serial frame numbers: Prot Sub\r\n");
     cfg_blink(false);
     return;
   }
@@ -252,7 +254,7 @@ static void cfg_cli(sl_cli_command_arg_t *a)
   } else {
     bool found = false;
     for (uint32_t k = 0; k < CFG_MODES; k++) if (cfg_eq(p, cfg_modes[k].key)) { c.proto = cfg_modes[k].proto; c.sub = cfg_modes[k].sub; found = true; break; }
-    if (!found) { printf("CFG unknown protocol '%s': nrf24 rlink uk d8 d16 dsmx sfhss fasst jeti txtest dsmcap\r\n", p); cfg_blink(false); return; }
+    if (!found) { printf("CFG unknown protocol '%s': nrf24 rlink uk d8 d16 dsmx sfhss fasst duplex jeti txtest dsmcap\r\n", p); cfg_blink(false); return; }
     i++;
   }
   if (i < n && rx) {                                                /* receiver: the output layout */
