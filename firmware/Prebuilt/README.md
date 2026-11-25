@@ -10,7 +10,7 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 
 ## Changes
 
-- **1.9 (source only so far; the hex follows once this tree has been bench-tested):**
+- **1.9 (25 Nov 2026; source, built and bench-tested by the author from this tree; the prebuilt hex follows — until then build it as in `firmware/README.md`, or use `rc_rf_module_1.8.hex` without Jeti):**
   - **Jeti Duplex 2.4, experimental** (Prot 111, `docs/JETI.md`): transmitter and receiver roles, from EdgeTX, the
     Controller (1.6), `cfg` and the TX panel. The transmitter is a port of mpm-v2's Jeti code.
   - **The bind store and the stored setup moved** from flash pages 0x08040000 / 0x08042000 to 0x08100000 /
