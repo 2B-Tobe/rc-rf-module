@@ -1,23 +1,26 @@
 # Prebuilt firmware
 
-`rc_rf_module_1.8.hex`: built from this folder's sources on 17 November 2026 (1.8) and tested on the author's
-boards: the TX panel, Futaba S-FHSS and FASST between two boards of this kind (experimental, not yet with Futaba
-equipment: `docs/FUTABA.md`), full power in every mode. Flash it with pyOCD over SWD, no toolchain needed:
+`rc_rf_module_1.9.hex`: built by the author from this folder's sources on 25 November 2026 (1.9) and tested on his
+boards: the experimental Jeti Duplex mode (`docs/JETI.md`), and a setup and a bind stored in the new flash pages.
+**Coming from 1.8 or earlier: set the module up and bind again after flashing, and use only the `setup/` files of
+this version** (see the changes below). Flash it with pyOCD over SWD, no toolchain needed:
 
 ```
-python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.8.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.9.hex
 ```
 
 ## Changes
 
-- **1.9 (25 Nov 2026; source, built and bench-tested by the author from this tree; the prebuilt hex follows — until then build it as in `firmware/README.md`, or use `rc_rf_module_1.8.hex` without Jeti):**
+- **1.9 (25 Nov 2026):**
   - **Jeti Duplex 2.4, experimental** (Prot 111, `docs/JETI.md`): transmitter and receiver roles, from EdgeTX, the
     Controller (1.6), `cfg` and the TX panel. The transmitter is a port of mpm-v2's Jeti code.
   - **The bind store and the stored setup moved** from flash pages 0x08040000 / 0x08042000 to 0x08100000 /
     0x08102000. The firmware had grown to within 2 KB of the old pages; one more mode and storing a setup or a
     bind would have erased part of the firmware. The build now stops if the firmware reaches the store.
     **After updating from 1.8 or earlier, set the module up and bind every receiver again**: the old setup and
-    binds are not carried over.
+    binds are not carried over. The files in `setup/` are rewritten for the new setup page, with two new ones
+    for a Jeti receiver; **setup files from 1.8 or earlier must not be flashed onto 1.9** (they write into the
+    firmware; flash the firmware again if it happened).
 - **1.8 (17 Nov 2026):** full flight power in every mode: S-FHSS and FASST (were +10 dBm) and DSMX (were 18 dBm at
   22 ms, 15 dBm at 11 ms) now at the module maximum, about +19.5 dBm, as the other modes. The power shown on the TX
   panel and in EdgeTX is rounded (19.5 reads 20).
@@ -61,18 +64,19 @@ python -m pyocd flash -t efr32mg24a420f1536im48 C:\dev\rc-rf-module\firmware\Pre
 To refresh it after a build and a bench test:
 
 ```
-Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.8.hex
+Copy-Item C:\dev\rc-rf-module\firmware\cmake_gcc\build\base\rc_module_trx.hex C:\dev\rc-rf-module\firmware\Prebuilt\rc_rf_module_1.9.hex
 ```
 
 ## Setting a board up with only an SWD programmer
 
-The files in `setup/` write only the setup page (0x08042000), as the `cfg` commands would: `setup_tx.hex`,
-`setup_tx_dual.hex`, receivers for RLINK, DSMX, D8, D16 and nRF24 with their output layouts, and `setup_clear.hex`.
+The files in `setup/` write only the setup page (0x08102000 from firmware 1.9; they are for 1.9 and later only), as
+the `cfg` commands would: `setup_tx.hex`, `setup_tx_dual.hex`, receivers for RLINK, DSMX, D8, D16, nRF24 and Jeti
+with their output layouts, and `setup_clear.hex`.
 The full step-by-step guide, with the list of files: `docs/FLASHING_STLINK.md`.
 
 ## Licence of the hex files
 
-The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.8.hex` also contains Silicon Labs software:
+The firmware is under the GNU GPL v3 (see `LICENSE`). `rc_rf_module_1.9.hex` also contains Silicon Labs software:
 the RAIL radio library (Zlib) and parts used under the Silicon Labs Master Software License Agreement
 (https://www.silabs.com/about-us/legal/master-software-license-agreement). Those Silicon Labs parts may be used
 only as part of this firmware on Silicon Labs devices; they may not be extracted, redistributed on their own or

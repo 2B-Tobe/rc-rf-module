@@ -8,7 +8,7 @@ transmitter module or a receiver. No USB-serial adapter, terminal program or con
 - An ST-Link V2 (an original or a clone) and three wires.
 - The module, powered from its normal supply.
 - A Windows PC with Python 3.
-- The files in `firmware/Prebuilt/`: the firmware `rc_rf_module_1.8.hex`, and the setup files in `setup/`.
+- The files in `firmware/Prebuilt/`: the firmware `rc_rf_module_1.9.hex`, and the setup files in `setup/`.
 
 ## 1. Prepare the PC (once)
 
@@ -40,14 +40,19 @@ J5 carries no supply: power the module as usual, from its own supply.
 In PowerShell, go to the folder with the files, then flash:
 ```
 cd C:\dev\rc-rf-module\firmware\Prebuilt
-python -m pyocd flash -t efr32mg24a420f1536im48 rc_rf_module_1.8.hex
+python -m pyocd flash -t efr32mg24a420f1536im48 rc_rf_module_1.9.hex
 ```
-pyOCD ends with a line like `Erased … programmed … bytes`. The stored setup and the binds are kept: a firmware
-update never touches them.
+pyOCD ends with a line like `Erased … programmed … bytes`. From 1.9 on the stored setup and the binds are kept by a
+firmware update. **Coming from 1.8 or earlier they are not:** 1.9 keeps them in other flash pages (the firmware had
+outgrown the old ones), so set the role again (step 4) and bind again.
 
 ## 4. Set the role
 
 Flash one setup file from `setup/`. It writes only the setup page; the firmware is not touched.
+
+> **The setup files belong to their firmware.** The files here are for firmware **1.9 and later** (setup page
+> 0x08102000). Do not flash setup files that came with 1.8 or earlier onto 1.9: they write to a page that is now
+> part of the firmware, and the module must then be flashed again. Likewise these files do nothing on 1.8.
 ```
 python -m pyocd flash -t efr32mg24a420f1536im48 setup\setup_tx.hex
 ```
@@ -65,6 +70,7 @@ python -m pyocd flash -t efr32mg24a420f1536im48 setup\setup_tx.hex
 | `setup_rx_d16.hex` / `_sbus` | FrSky D16 receiver, EU-LBT, 8 servos / 5 + SBUS |
 | `setup_rx_d16_fcc.hex` / `_sbus` | FrSky D16 receiver, FCC, 8 servos / 5 + SBUS |
 | `setup_rx_nrf24.hex` | nRF24 receiver, 8 servos |
+| `setup_rx_jeti.hex` / `_sbus` | Jeti Duplex receiver (experimental, `JETI.md`), 8 servos / 5 + SBUS |
 | `setup_clear.hex` | nothing stored: the jumpers decide again |
 
 Then bind as usual: for a receiver, the bind plug on servo connector 8 at power-up.
