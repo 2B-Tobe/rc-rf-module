@@ -6,6 +6,7 @@
 | `SERIAL_INPUT.md` | what a transmitter sends (PPM, the Multiprotocol serial frame, the failsafe frame) and the `cfg` setup commands any programmer can use |
 | `RLINK.md` | the RLINK two-way link |
 | `FUTABA.md` | Futaba S-FHSS and FASST — experimental: what is known, how to use them, what is untested |
+| `JETI.md` | Jeti Duplex 2.4 ("quasi Jeti") — experimental: transmitter and receiver roles, what is tested and what is not |
 | `TX_PANEL.md` | the TX panel add-on: display, buttons and LED on a transmitter module; wiring, build versions, use |
 | `../controller/docs/MANUAL.md`, `QUICK_SHEET.md`, `CUBEIDE.md` | the Controller box |
 | `../firmware/README.md` | building and flashing the firmware |

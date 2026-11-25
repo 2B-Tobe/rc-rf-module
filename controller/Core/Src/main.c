@@ -27,7 +27,7 @@
 #include "link.h"
 #include <string.h>
 
-#define VERSION "1.5"
+#define VERSION "1.6"
 
 /* ------------------------------------------------------------------ the module's modes, in Prot / Sub numbering */
 typedef struct {
@@ -50,6 +50,7 @@ static const mode_t modes[] = {
   {  6, 2, "DSMX",      true,  true,  true  },   /* DSMX 22 ms */
   { 21, 0, "S-FHSS",    true,  true,  true  },   /* Futaba S-FHSS; experimental */
   { 110, 0, "FASST",    true,  true,  true  },   /* Futaba FASST 10ch; receiver: for a transmitter board of this kind; experimental */
+  { 111, 0, "Jeti",     true,  true,  true  },   /* quasi Jeti Duplex (mpm-v2's number); experimental */
   {  0, 6, "Jeti cap",  true,  true,  false },
   {  0, 7, "TX test",   true,  false, false },
   {  0, 4, "DSM cap",   false, true,  false },

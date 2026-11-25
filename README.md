@@ -6,7 +6,7 @@ on 459 MHz beside the 2.4 GHz link. One firmware serves both roles and both boar
 
 | | |
 |---|---|
-| **Transmitter module** | takes the channels from a transmitter's encoder — PPM, or Multiprotocol serial frames — and sends them on nRF24, RLINK, FrSky D8, FrSky D16 (ACCST v1/v2, EU-LBT or FCC) or DSMX — and, **experimental**, Futaba S-FHSS and FASST (`docs/FUTABA.md`) — with the 459 MHz link beside it when the RA-01 is fitted |
+| **Transmitter module** | takes the channels from a transmitter's encoder — PPM, or Multiprotocol serial frames — and sends them on nRF24, RLINK, FrSky D8, FrSky D16 (ACCST v1/v2, EU-LBT or FCC) or DSMX — and, **experimental**, Futaba S-FHSS and FASST (`docs/FUTABA.md`) and Jeti Duplex (`docs/JETI.md`) — with the 459 MHz link beside it when the RA-01 is fitted |
 | **Receiver** | 8 servo outputs, PPM and SBUS; with the RA-01 fitted it listens on both bands and takes the servos from 459 MHz when 2.4 GHz goes quiet |
 | **Setup** | protocol jumpers, or a setup stored in the module: written over its serial pins with the hand-held **Controller** (this repository) or a terminal |
 | **TX panel (add-on)** | a small display, three or four buttons and a red / green LED on pins the board already has: mode, Single / Dual, input, bind and range check set on the module itself (`docs/TX_PANEL.md`) |
@@ -29,7 +29,7 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 | `controller/` | the RF Module Controller: an STM32F103C8 box with a 128×64 display that sets the module up over its serial pins — STM32CubeIDE project, manual |
 | `hardware/rf_module/` | the module carrier board: KiCad project, Gerbers, BOM and placement files |
 | `hardware/controller/` | the controller board: KiCad project, Gerbers, BOM and placement files |
-| `docs/` | operating quick sheet, flashing with an ST-Link, the serial input and setup command reference, the RLINK description, the TX panel, the experimental Futaba modes |
+| `docs/` | operating quick sheet, flashing with an ST-Link, the serial input and setup command reference, the RLINK description, the TX panel, the experimental Futaba and Jeti modes |
 | `CREDITS.md` | people, projects and components this builds on, with their licences |
 
 ## Start here
@@ -48,7 +48,7 @@ The servo outputs are on the same pins for both variants (`firmware/servo_pins.h
 
 The 2.4 GHz side: every mode flies at the module's full power (about +19.5 dBm); DSMX at 22 ms only, FrSky D16 EU-LBT (Sub 0/1) with listen-before-talk (the D16 FCC versions, Sub 2/3/5, are for receivers with FCC firmware and have none), RLINK
 with a clear-channel check before every packet. The experimental Futaba modes (S-FHSS, FASST) have no
-listen-before-talk. The 459 MHz link uses the UK 458.5–459.5 MHz model-control
+listen-before-talk; the experimental Jeti mode checks for a clear channel before every frame. The 459 MHz link uses the UK 458.5–459.5 MHz model-control
 band at 100 mW; check what your country allows before fitting the RA-01.
 
 ## Licence

@@ -1,7 +1,7 @@
 /*
  * cfg.h — the module's stored setup: role, protocol and option, so a board needs no protocol jumpers.   v1.0
  *
- * One record in its own flash page (0x08042000, next to the bind store), written over the log UART (J3: PA06
+ * One record in its own flash page (0x08102000, next to the bind store), written over the log UART (J3: PA06
  * in, PA05 out) with the "cfg" command — from PuTTY today, from the programmer box later. A firmware update
  * leaves the page alone, so a board is set up once.
  *

@@ -47,6 +47,7 @@ Protocol / sub-protocol numbers the module answers to:
 | DSMX 22 ms | 6 | 2 |
 | Futaba S-FHSS — **experimental** (see `FUTABA.md`) | 21 | 0 |
 | Futaba FASST 10ch — **experimental** (see `FUTABA.md`) | 110 | 0 |
+| Jeti Duplex — **experimental** (see `JETI.md`) | 111 | 0 |
 
 Anything else: RF off, both LEDs alternate, the log says why.
 
@@ -95,11 +96,12 @@ X7). It is the same firmware: the module tells the radios apart by itself, with 
   - FrSkyX2 (64) CH_16 / EU_16
   - Futaba (21) SFHSS — experimental
   - FASST (110) 10CH — experimental (110 is mpm-v2's number; Multiprotocol has no FASST)
+  - Jeti (111) DUPLEX — experimental (111 is mpm-v2's number; Multiprotocol has no Jeti)
   - **MiTo (120)** nRF24 / RLINK / UK459
   - Anything else shows "Protocol invalid".
 - **Single or dual band** (the 459 MHz link beside 2.4 GHz, where the RA-01 is fitted), set per model:
   - MiTo: Option value 0 = single, any other value = dual.
-  - FrSkyD, FrSkyX, FrSkyX2, Futaba, FASST: Option value 1 = dual, anything else single.
+  - FrSkyD, FrSkyX, FrSkyX2, Futaba, FASST, Jeti: Option value 1 = dual, anything else single.
   - DSM: EdgeTX fills the option byte itself, so its **Max throw** box switches dual on.
   - Dual only helps a receiver that is a MiTo board with the RA-01. A FrSky or Spektrum receiver hears
     2.4 GHz only.

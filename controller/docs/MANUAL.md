@@ -148,6 +148,7 @@ the BIND jumper.
 | DSMX | yes (22 ms) | yes | 6 / 2 |
 | S-FHSS | Futaba S-FHSS, **experimental** | yes, experimental | 21 / 0 |
 | FASST | Futaba FASST 10ch, **experimental** | for a transmitter board of this kind, experimental | 110 / 0 |
+| Jeti | Jeti Duplex ("quasi Jeti"), **experimental** | for a Jeti transmitter module or a board of this kind, experimental | 111 / 0 |
 | Jeti cap | capture tool | capture tool | 0 / 6 |
 | TX test | carrier test | — | 0 / 7 |
 | DSM cap | — | capture tool | 0 / 4 |

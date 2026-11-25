@@ -79,6 +79,7 @@ If the link comes up inside the 8 s, the receiver also stores that moment's posi
 | DSMX | yes (22 ms) | yes | 6 / 2 |
 | S-FHSS | yes, experimental | yes, experimental | 21 / 0 |
 | FASST | yes, experimental | this kind of board, experimental | 110 / 0 |
+| Jeti | yes, experimental | yes, experimental | 111 / 0 |
 | Jeti cap | tool | tool | 0 / 6 |
 | TX test | carrier | — | 0 / 7 |
 | DSM cap | — | tool | 0 / 4 |
