@@ -95,6 +95,16 @@
 #define SL_IOSTREAM_EUSART_INST_PERIPHERAL_NO    0
 #endif
 
+// rc_module_trx: the log / command line pins follow the board (board_config.h).
+//   module: TX PA05, RX PA06.   Seeed XIAO MG24: TX PA08, RX PA09 = its USB serial bridge.
+#include "board_config.h"
+#if BOARD == BOARD_XIAO_MG24
+#define SL_IOSTREAM_EUSART_INST_TX_PORT          SL_GPIO_PORT_A
+#define SL_IOSTREAM_EUSART_INST_TX_PIN           8
+#define SL_IOSTREAM_EUSART_INST_RX_PORT          SL_GPIO_PORT_A
+#define SL_IOSTREAM_EUSART_INST_RX_PIN           9
+#endif
+
 // EUSART0 TX on PA05
 #ifndef SL_IOSTREAM_EUSART_INST_TX_PORT         
 #define SL_IOSTREAM_EUSART_INST_TX_PORT          SL_GPIO_PORT_A

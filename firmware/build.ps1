@@ -2,6 +2,7 @@
 #
 #   .\build.ps1        run it in the project folder, or give its full path
 #                      TX panel options (input, 3 or 4 buttons): panel_config.h, set before building
+#                      The board (the module, or a Seeed XIAO MG24): board_config.h, set before building
 #
 # What it does:
 #   1. Marks app_process.c as changed. The protocol files (rlink.c, nrf24_rx.c,
@@ -27,6 +28,10 @@ $proj  = $PSScriptRoot
 
 # the TX panel options in panel_config.h, shown so the build says what it is
 Get-Content (Join-Path $proj 'panel_config.h') | Where-Object { $_ -match '^#define PANEL_(INPUT|BUTTONS) ' } | ForEach-Object { Write-Host ('Panel: ' + $_.Trim()) }
+# the board in board_config.h, shown so the build says what it is for
+$board = (Get-Content (Join-Path $proj 'board_config.h') | Where-Object { $_ -match '^#define BOARD\s+BOARD_' } | Select-Object -First 1)
+$xiao  = ($board -match 'BOARD_XIAO_MG24')
+Write-Host ('Board: ' + $(if ($xiao) { 'Seeed XIAO MG24 (do NOT flash this build onto the module)' } else { 'RF-BM-MG24 module (the normal build)' }))
 $conan = Join-Path $env:USERPROFILE '.silabs\slt\installs\conan\p'
 
 if (-not (Test-Path (Join-Path $proj 'cmake_gcc\CMakePresets.json'))) {
@@ -103,3 +108,4 @@ try {
   Pop-Location
 }
 Write-Host ("Built: " + (Join-Path $proj 'cmake_gcc\build\base\rc_module_trx.hex'))
+if ($xiao) { Write-Host 'This is a XIAO MG24 build: flash it onto a XIAO only (docs/XIAO_MG24.md). Set BOARD back to BOARD_MODULE in board_config.h before building for the module.' }

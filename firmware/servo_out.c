@@ -57,9 +57,14 @@ static volatile uint32_t so_frames, so_late_n, so_late_max, so_jump_n, so_jump_m
 /* the pin of output o (0..7 servos, 8 = PPM) in this layout; NULL = the output has no pin (its connector does SBUS / PPM) */
 static const sl_gpio_t *so_pin(uint8_t o)
 {
+#if BOARD_FIXED_SBUS_PPM
+  if (o == SO_PPM) return &so_ppm_pc03;                            /* board.h: PPM stays on PC03 */
+#else
   if (o == SO_PPM) return (so_layout & RXOUT_PPM) ? &so_servo[6] : &so_ppm_pc03;
+#endif
   if (o == 5u && (so_layout & RXOUT_SBUS)) return NULL;
   if (o == 6u && (so_layout & RXOUT_PPM))  return NULL;
+  if (!((BOARD_SERVO_MASK >> o) & 1u)) return NULL;                /* board.h: this servo output has no pin on this board */
   return &so_servo[o];
 }
 /* timer compare output o to its pin on / off */

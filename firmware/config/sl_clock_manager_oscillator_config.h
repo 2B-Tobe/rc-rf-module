@@ -81,6 +81,12 @@
 
 // <o SL_CLOCK_MANAGER_HFXO_CTUNE> CTUNE <0-255>
 // <d> 140
+// rc_module_trx: the crystal trim follows the board (board_config.h): 70 for the RF-BM-MG24 module, 95 for the Seeed
+// XIAO MG24 (the value Silicon Labs' Arduino core and Zephyr use for that board).
+#include "board_config.h"
+#if BOARD == BOARD_XIAO_MG24
+#define SL_CLOCK_MANAGER_HFXO_CTUNE    95
+#endif
 #ifndef SL_CLOCK_MANAGER_HFXO_CTUNE
 #define SL_CLOCK_MANAGER_HFXO_CTUNE    70
 #endif

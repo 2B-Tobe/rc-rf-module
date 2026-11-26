@@ -15,8 +15,8 @@
 #define BAY_GAP_US      3000u    /* frames are 3.1 ms long, 22 ms apart: more than 3 ms of silence starts a new frame */
 #define BAY_GAP_ETX_US  1000u    /* EdgeTX: 3 to 4 ms frames every 7 ms, sent without pauses: 1 ms of silence is enough */
 #define BAY_IRQ_PRIO    4u       /* below TIMER0 (PPM capture, 2); the 16-byte RX FIFO covers 1.9 ms of latency   */
-#define BAY_RX_PORT     SL_GPIO_PORT_A
-#define BAY_RX_PIN      6u
+#define BAY_RX_PORT     BOARD_IN_PORT    /* board.h: PA06 on the module, PC07 (D7) on the XIAO */
+#define BAY_RX_PIN      BOARD_IN_PIN
 #define BAY_TX_PORT     SL_GPIO_PORT_B   /* telemetry out: the PPM input pin, idle in encoder mode */
 #define BAY_TX_PIN      1u
 #define BAY_TELEM_LEN   16u

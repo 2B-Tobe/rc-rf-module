@@ -7,6 +7,7 @@
 | `RLINK.md` | the RLINK two-way link |
 | `FUTABA.md` | Futaba S-FHSS and FASST — experimental: what is known, how to use them, what is untested |
 | `JETI.md` | Jeti Duplex 2.4 ("quasi Jeti") — experimental: transmitter and receiver roles, what is tested and what is not |
+| `XIAO_MG24.md` | The firmware on a Seeed Studio XIAO MG24 as a development board: what differs, the pads, building and flashing (not yet run on a XIAO) |
 | `TX_PANEL.md` | the TX panel add-on: display, buttons and LED on a transmitter module; wiring, build versions, use |
 | `../controller/docs/MANUAL.md`, `QUICK_SHEET.md`, `CUBEIDE.md` | the Controller box |
 | `../firmware/README.md` | building and flashing the firmware |

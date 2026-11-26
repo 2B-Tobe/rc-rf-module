@@ -617,7 +617,9 @@ void rlink_start(sl_rail_handle_t rh, const volatile uint16_t *ch_us, bool rx_ro
     sl_rail_set_tx_power_dbm(r_rail, range_low ? RL_RANGE_POWER_DDBM : RL_TX_POWER_DDBM);
     rlink_diag[R_PWR]=sl_rail_get_tx_power_dbm(r_rail);
     r_pc_on = RL_PC_ENABLE && !range_low;           /* range check keeps its fixed low power */
+#if BOARD_HAS_ALARM_PIN
     sl_gpio_set_pin_mode(&r_alarm_pin,SL_GPIO_MODE_PUSH_PULL,0);
+#endif
     if(RL_ALARM_TONE){ sl_gpio_set_pin_mode(&r_buzz_pin,SL_GPIO_MODE_PUSH_PULL,0); r_tone_init(); }
     r_pc_req=RL_TX_POWER_DDBM; r_pc_dirty=false; r_pc_last_us=now; rlink_diag[R_PC_REQ]=r_pc_on?r_pc_req:(range_low?RL_RANGE_POWER_DDBM:RL_TX_POWER_DDBM);
     r_base=0; r_seq=0; r_frame_us=now+RL_FRAME_US;
@@ -859,7 +861,11 @@ void rlink_action(void)
       r_tone(on);
     }
 #endif
+#if BOARD_HAS_ALARM_PIN
     if(all) sl_gpio_set_pin(&r_alarm_pin); else sl_gpio_clear_pin(&r_alarm_pin);
+#else
+    (void)r_alarm_pin;
+#endif
     /* LED_A: steady = link fine, 2 Hz blink = warning, flicker per frame = no telemetry */
     if(r_alm_level==2){ static int32_t la=0; if(rlink_diag[R_FTX]!=la){ la=rlink_diag[R_FTX]; sl_gpio_toggle_pin(&r_led_a); } }
     else if(all>=1){ if(((now/250000u)&1u)) sl_gpio_set_pin(&r_led_a); else sl_gpio_clear_pin(&r_led_a); }

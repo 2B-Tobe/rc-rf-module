@@ -48,6 +48,7 @@
 #include "sl_simple_button_instances.h"
 #include "sl_gpio.h"
 #include "sl_device_gpio.h"
+#include "board.h"        // the board: module or Seeed XIAO MG24 (board_config.h)
 #include "sl_code_classification.h"
 #include "em_device.h"
 #include "em_eusart.h"
@@ -548,7 +549,9 @@ static bool rxp_read(sl_rail_handle_t rh)
 static void rx_outputs_boot(sl_rail_handle_t rh, uint8_t layout, bool plug)
 {
   servo_out_layout(layout);
+#if !BOARD_FIXED_SBUS_PPM                                           // (XIAO: SBUS stays on PA03, PA08 is its USB serial)
   if (layout & RXOUT_SBUS) sbus_set_pin(SL_GPIO_PORT_A, 8);         // SBUS on connector 6 (PA08) instead of PA03
+#endif
   rxp_held = plug;
   rxs_pairing = rxp_held;                                           // pairing: a TX module sending setup packets becomes an owner
   if (rxp_held) {
@@ -707,7 +710,7 @@ static void ppm_pa06_watch(bool on)             // TIMER0 CC1 <- PA06, for bay_d
 {
   if (on) {
     if (ppm_pa06_int < 0) {
-      sl_gpio_t pa06 = { .port = SL_GPIO_PORT_A, .pin = 6 };
+      sl_gpio_t pa06 = { .port = BOARD_IN_PORT, .pin = BOARD_IN_PIN };   // board.h: PA06 on the module, PC07 (D7) on the XIAO
       int32_t n = SL_GPIO_INTERRUPT_UNAVAILABLE;
       if (sl_gpio_configure_external_interrupt(&pa06, &n, SL_GPIO_INTERRUPT_FALLING_EDGE,
                                                (sl_gpio_irq_callback_t)ppm_pa06_edge_cb, NULL) != SL_STATUS_OK || n < 0) return;
@@ -1010,7 +1013,7 @@ static void start_frame_timer(void)
 #define BAY_PROBE_MS  2000u
 static bool j3_rx_driven(sl_rail_handle_t rh)
 {
-  sl_gpio_t rx = { .port = SL_GPIO_PORT_A, .pin = 6 };
+  sl_gpio_t rx = { .port = BOARD_IN_PORT, .pin = BOARD_IN_PIN };   // board.h: PA06 on the module, PC07 (D7) on the XIAO
   bool up, down;
   sl_gpio_set_pin_mode(&rx, SL_GPIO_MODE_INPUT_PULL, 1);
   uint32_t t0 = (uint32_t)sl_rail_get_time(rh); while (((uint32_t)sl_rail_get_time(rh) - t0) < 300u) { }
@@ -1058,7 +1061,8 @@ static void proto_start(void)
   sl_gpio_set_pin_mode(&proto0_pin, SL_GPIO_MODE_INPUT_PULL, 1);
   sl_gpio_set_pin_mode(&proto1_pin, SL_GPIO_MODE_INPUT_PULL, 1);
   sl_gpio_set_pin_mode(&proto2_pin, SL_GPIO_MODE_INPUT_PULL, 1);
-  bool panel = panel_start(rh);                     // TX panel (tx_panel.c): a display on PA08 / PA09 = transmitter only
+  bool panel = BOARD_HAS_PANEL ? panel_start(rh) : false;   // (board.h: no panel on the XIAO, PA08 / PA09 are its USB serial)
+  // TX panel (tx_panel.c): a display on PA08 / PA09 = transmitter only
   // Who decides the role and the protocol (cfg.h):
   //   nothing stored: the jumpers, exactly as before (F/S = receiver, RANGE at power-up = encoder serial, PC00..PC02 = protocol)
   //   TX stored:      F/S low = encoder serial control; F/S high = whichever input comes first: the encoder's MULTI
@@ -1088,7 +1092,7 @@ static void proto_start(void)
 #endif
   }
   is_rx = cfg_used ? (cfg_boot.role == CFG_ROLE_RX) : fs;
-  bool plug = panel ? false : rxp_read(rh);                         // bind plug on servo connector 8 (PB05, unconnected in the module bay)
+  bool plug = (panel || !BOARD_HAS_BIND_PLUG) ? false : rxp_read(rh);                         // bind plug on servo connector 8 (PB05, unconnected in the module bay)
   if (plug && !is_rx) {                             // a new board, or one set up as a transmitter: the plug makes it a receiver
     cfg_used = true;                                // for this power-up only (nothing is stored): RLINK receiver, binding and
     memset(&cfg_boot, 0, sizeof cfg_boot);          // listening for setup packets, so a TX module can pair with it and set it up
@@ -1157,6 +1161,10 @@ static void proto_start(void)
     if (bay_unsupported) app_log("SETUP Prot %u Sub %u is not a %s mode of this module: RF off, both LEDs blink. Store another with cfg\r\n",
                                  cfg_boot.proto, cfg_boot.sub, is_rx ? "receiver" : "transmitter");
   } else app_log("SETUP none stored: the jumpers decide ('cfg' on this line stores one)\r\n");
+#if BOARD == BOARD_XIAO_MG24
+  app_log("BOARD " BOARD_NAME " (board_config.h): antenna %s; log and command line on USB; signal input (MULTI serial / PPM) on " BOARD_IN_NAME ", PPM also on D16 (PB01); SBUS out D8 (PA03), PPM out D3 (PC03), no PWM servo outputs; no 459 MHz radio, no TX panel\r\n",
+          XIAO_ANTENNA_UFL ? "U.FL connector" : "on the board");
+#endif
   { extern uint32_t __etext, __data_start__, __data_end__;   // linker symbols: where the firmware image ends in flash
     app_log("FLASH firmware ends at 0x%08lX; bind store 0x08100000, setup store 0x08102000 (above the firmware)\r\n",
             (unsigned long)((uint32_t)&__etext + ((uint32_t)&__data_end__ - (uint32_t)&__data_start__))); }
@@ -1201,7 +1209,9 @@ static void proto_start(void)
       EUSART_IntDisable(EUSART1, EUSART_IEN_RXFL);
       EUSART_Enable(EUSART1, eusartDisable);      // PA06 back to the log UART alone: its command line keeps listening
       bay_listen = false;
+#if BOARD_LOG_SHARES_IN
       if (ppm_on_pa06) EUSART0->CMD = EUSART_CMD_RXDIS;   // ... unless the PPM comes in on it: the command line stops listening
+#endif
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log(ppm_on_pa06 ? "BAY PPM on J3 RX (PA06, a radio's bay pin 1) came first: the stored protocol on PPM input, encoder serial and the command line off until the next power-up\r\n"
                           : "BAY PPM on PB01 came first: the stored protocol on PPM input, encoder serial off until the next power-up\r\n");
@@ -1211,9 +1221,11 @@ static void proto_start(void)
   if (bay_listen) {
     bay_frame_t f;
     (void)bay_get(&f);                            // the frame bay_detect returned
+#if BOARD_LOG_SHARES_IN                           // (XIAO: the command line is on USB and keeps listening)
     EUSART0->CMD = EUSART_CMD_RXDIS;              // the encoder owns PA06 now: the log UART (and its command line) stops listening
     { uint8_t junk[16]; size_t n;                 // ... and what the frames left in its buffer is dropped, not echoed
       do { n = 0; if (sl_iostream_read(sl_iostream_inst_handle, junk, sizeof junk, &n) != SL_STATUS_OK) break; } while (n != 0u); }
+#endif
     {
       proto_t p;
       bay_boot = f;
@@ -1275,9 +1287,13 @@ static void proto_start(void)
   // DUAL build: the SX1278 (uk459_tx.c) is looked for in every role. With the encoder its BIND and RANGE come
   // from the frames (bind_in / range_in: the RANGE pin is the encoder jumper then, not the range check).
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
+#if BOARD == BOARD_XIAO_MG24
+  app_log("BUILD " BOARD_NAME ": 2.4 GHz only, encoder control\r\n");
+#else
   app_log("BUILD dual-serial: 2.4 GHz + SX1278 UK 459 MHz, encoder control, servo outputs PA07 PB04 PD04 PD05 PA00 PA08 PA09 PB05\r\n");
 #endif
-  uk_have_sx = uk_probe(rh);
+#endif
+  uk_have_sx = BOARD_HAS_SX1278 ? uk_probe(rh) : false;   // board.h: the XIAO build has no 459 MHz radio and leaves its pins alone
   if (uk_have_sx) {
     bool rx_role = is_rx && (nrf_rx_role || proto == PROTO_D8 || proto == PROTO_D16 || proto == PROTO_DSMRX || proto == PROTO_RLINK || proto == PROTO_SFHSS || proto == PROTO_FASST || proto == PROTO_JETI);
     if (proto == PROTO_UKRX) { /* the receiver role takes the SX1278 itself (uk_rx_start in the main loop) */ }
@@ -1320,6 +1336,7 @@ static void proto_start(void)
 void app_process_action(void)
 {
   sl_rail_handle_t rh = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+  board_service();                                   // XIAO: its own LED follows LED_B
 
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
   if (fs_cmd_log) { fs_cmd_log = false; app_log("BAY failsafe frame from the encoder: the receiver stores these positions\r\n"); }

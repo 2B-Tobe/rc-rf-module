@@ -52,6 +52,7 @@
 #include "sl_gpio.h"
 #include "sl_iostream.h"
 #include "sl_iostream_init_eusart_instances.h"
+#include "board.h"        // the board: module or Seeed XIAO MG24 (board_config.h)
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -108,6 +109,7 @@ void rail_app_init(void)
 
 void app_init(void)
 {
+  board_early_init();              // XIAO: antenna switch on, flash chip deselected (nothing on the module)
   serial_mode_quiet_log_input();   // lemon-serial: before the CLI's first pass
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
   rail_app_init();
@@ -127,6 +129,9 @@ void app_init(void)
  *****************************************************************************/
 static void serial_mode_quiet_log_input(void)
 {
+#if !BOARD_LOG_SHARES_IN
+  return;                                                    // the command line has its own pin (XIAO: USB)
+#else
   sl_gpio_t range = { .port = SL_GPIO_PORT_B, .pin = 2 };    // RANGE, active low
   sl_gpio_t fs    = { .port = SL_GPIO_PORT_B, .pin = 3 };    // F/S,   active low
   sl_gpio_set_pin_mode(&range, SL_GPIO_MODE_INPUT_PULL, 1);
@@ -144,4 +149,5 @@ static void serial_mode_quiet_log_input(void)
     n = 0;
     if (sl_iostream_read(sl_iostream_inst_handle, junk, sizeof(junk), &n) != SL_STATUS_OK) break;
   } while (n != 0u);
+#endif
 }
